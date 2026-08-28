@@ -1,13 +1,31 @@
+```css
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 
-/* Plus Jakarta Sans for regular text */
+/* =========================================================
+   PLUS JAKARTA SANS
+   Apply to regular document text only.
+   ========================================================= */
+
 body,
 #quarto-content,
 .navbar {
   font-family: 'Plus Jakarta Sans', sans-serif !important;
 }
 
-/* Keep Quarto's default monospace font for all code */
+/* Make navbar text use Jakarta Sans without applying the
+   font to arbitrary descendants inside the content area. */
+.navbar a,
+.navbar-title,
+.navbar-brand {
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+}
+
+
+/* =========================================================
+   DEFAULT QUARTO MONOSPACE
+   Restore Quarto's native monospace font for code.
+   ========================================================= */
+
 #quarto-content code,
 #quarto-content pre,
 #quarto-content kbd,
@@ -15,7 +33,58 @@ body,
   font-family: var(--quarto-font-monospace) !important;
 }
 
-/* Quarto code blocks inherit their monospace font */
-#quarto-content pre code {
+
+/* =========================================================
+   INLINE CODE
+   Explicitly override inherited document font.
+   ========================================================= */
+
+#quarto-content p code,
+#quarto-content li code,
+#quarto-content td code,
+#quarto-content th code,
+#quarto-content blockquote code,
+#quarto-content a code,
+#quarto-content code {
   font-family: var(--quarto-font-monospace) !important;
 }
+
+
+/* =========================================================
+   QUARTO / PANDOC CODE BLOCKS
+   Quarto's syntax highlighting uses <span> elements inside
+   <code>, so make sure they inherit the monospace font.
+   ========================================================= */
+
+#quarto-content pre code,
+#quarto-content pre code span,
+#quarto-content code.sourceCode,
+#quarto-content code.sourceCode span,
+#quarto-content pre.sourceCode,
+#quarto-content div.sourceCode,
+#quarto-content div.sourceCode pre {
+  font-family: var(--quarto-font-monospace) !important;
+}
+
+
+/* =========================================================
+   KEYBOARD / SAMPLE ELEMENTS
+   ========================================================= */
+
+#quarto-content kbd,
+#quarto-content samp {
+  font-family: var(--quarto-font-monospace) !important;
+}
+
+
+/* =========================================================
+   IMPORTANT:
+   DO NOT use selectors such as:
+
+   #quarto-content *
+   #quarto-content *:not(.anchorjs-link)
+   .navbar *
+
+   Those selectors force Jakarta Sans onto code elements.
+   ========================================================= */
+```
