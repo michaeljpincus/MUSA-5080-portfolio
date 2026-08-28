@@ -29,6 +29,7 @@ format:
     toc: true
     code-fold: false
     code-tools: true
+    anchor-sections: false
 
 execute:
   freeze: auto
