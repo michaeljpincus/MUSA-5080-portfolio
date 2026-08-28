@@ -1,28 +1,22 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 
+/* Apply the custom font to text elements only */
 body,
-#quarto-content,
-#quarto-content *:not(.anchorjs-link),
+#quarto-content p,
+#quarto-content li,
+#quarto-content td,
+#quarto-content th,
+#quarto-content h1,
+#quarto-content h2,
+#quarto-content h3,
+#quarto-content h4,
+#quarto-content h5,
+#quarto-content h6,
+#quarto-content blockquote,
+#quarto-content a:not(.anchorjs-link),
 .navbar,
-.navbar * {
+.navbar a,
+.navbar-title,
+.navbar-brand {
   font-family: 'Plus Jakarta Sans', sans-serif !important;
-}
-
-/* Don't force our font onto code blocks */
-#quarto-content pre,
-#quarto-content code,
-#quarto-content kbd,
-#quarto-content samp {
-  font-family: var(--quarto-font-monospace) !important;
-}
-
-/* Don't force our font onto icon glyphs (anchor links, bootstrap icons, etc.) */
-#quarto-content .anchorjs-link,
-#quarto-content .anchorjs-link::after,
-#quarto-content [data-anchorjs-icon]::after,
-#quarto-content .bi,
-#quarto-content .bi::before,
-.navbar .bi,
-.navbar .bi::before {
-  font-family: anchorjs-icons !important;
 }
