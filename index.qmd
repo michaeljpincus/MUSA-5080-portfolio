@@ -2,7 +2,7 @@
 title: "Home"
 ---
 
-# YOUR NAME HERE {#welcome}
+# Michael Pincus {#welcome}
 
 <!-- CHANGE THIS: replace with your own name above -->
 
