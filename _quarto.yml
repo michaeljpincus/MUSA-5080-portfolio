@@ -4,8 +4,9 @@ project:
   execute-dir: project
 
 website:
-  title: "Michael Pincus - MUSA 5080 Portfolio"        # <-- CHANGE THIS
+  title: "Michael Pincus - MUSA 5080 Portfolio"
   description: "Public Policy Analytics portfolio"
+
   navbar:
     title: "Portfolio"
     left:
@@ -19,11 +20,12 @@ website:
         text: "Assignments"
     right:
       - icon: github
-        href: https://github.com/michaeljpincus/MUSA-5080-portfolio      # <-- CHANGE THIS
+        href: https://github.com/michaeljpincus/MUSA-5080-portfolio
 
 format:
   html:
     theme: cosmo
+    css: styles.css
     toc: true
     code-fold: false
     code-tools: true
