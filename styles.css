@@ -18,16 +18,11 @@ body,
 
 /* Don't force our font onto icon glyphs (anchor links, bootstrap icons, etc.) */
 #quarto-content .anchorjs-link,
-#quarto-content .bi,
-.navbar .bi {
-  font-family: revert !important;
-}
-
-#quarto-content .anchorjs-link,
-#quarto-content .anchorjs-link::before,
+#quarto-content .anchorjs-link::after,
+#quarto-content [data-anchorjs-icon]::after,
 #quarto-content .bi,
 #quarto-content .bi::before,
 .navbar .bi,
 .navbar .bi::before {
-  font-family: revert !important;
+  font-family: anchorjs-icons !important;
 }
