@@ -1,6 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 
-/* Apply the custom font to text elements only */
+/* Apply the custom font to normal text only */
 body,
 #quarto-content p,
 #quarto-content li,
@@ -21,10 +21,14 @@ body,
   font-family: 'Plus Jakarta Sans', sans-serif !important;
 }
 
-/* Restore default monospace font for all code, inline or block */
-#quarto-content code,
-#quarto-content pre,
-#quarto-content kbd,
-#quarto-content samp {
-  font-family: var(--quarto-font-monospace) !important;
+/* Keep ALL code in the default monospace font */
+code,
+pre,
+kbd,
+samp,
+code *,
+pre *,
+kbd *,
+samp * {
+  font-family: monospace !important;
 }
