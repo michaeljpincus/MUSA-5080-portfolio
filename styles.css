@@ -2,8 +2,23 @@
 
 body,
 #quarto-content,
-#quarto-content *:not(.anchorjs-link),
+#quarto-content *,
 .navbar,
 .navbar * {
   font-family: 'Plus Jakarta Sans', sans-serif !important;
+}
+
+/* Don't force our font onto code blocks */
+#quarto-content pre,
+#quarto-content code,
+#quarto-content kbd,
+#quarto-content samp {
+  font-family: var(--bs-font-monospace), monospace !important;
+}
+
+/* Don't force our font onto icon glyphs (anchor links, bootstrap icons, etc.) */
+#quarto-content .anchorjs-link,
+#quarto-content .bi,
+.navbar .bi {
+  font-family: revert !important;
 }
