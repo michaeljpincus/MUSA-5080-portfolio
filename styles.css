@@ -20,3 +20,11 @@ body,
 .navbar-brand {
   font-family: 'Plus Jakarta Sans', sans-serif !important;
 }
+
+/* Restore default monospace font for all code, inline or block */
+#quarto-content code,
+#quarto-content pre,
+#quarto-content kbd,
+#quarto-content samp {
+  font-family: var(--quarto-font-monospace) !important;
+}
