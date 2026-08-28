@@ -22,3 +22,12 @@ body,
 .navbar .bi {
   font-family: revert !important;
 }
+
+#quarto-content .anchorjs-link,
+#quarto-content .anchorjs-link::before,
+#quarto-content .bi,
+#quarto-content .bi::before,
+.navbar .bi,
+.navbar .bi::before {
+  font-family: revert !important;
+}
