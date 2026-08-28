@@ -11,10 +11,12 @@ body,
 #quarto-content code,
 #quarto-content pre,
 #quarto-content kbd,
-#quarto-content samp {
-  font-family: var(--quarto-font-monospace) !important;
+#quarto-content samp,
+#quarto-content pre code {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace !important;
 }
 
 /* Quarto code blocks inherit their monospace font */
 #quarto-content pre code {
   font-family: var(--quarto-font-monospace) !important;
+
