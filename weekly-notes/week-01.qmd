@@ -28,3 +28,4 @@ it on your published site, R and Quarto are talking to each other correctly.
 ```{r}
 sessionInfo()$R.version$version.string
 ```
+
