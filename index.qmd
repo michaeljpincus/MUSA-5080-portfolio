@@ -10,8 +10,6 @@ This site documents my work in the Master of Urban Spatial Analytics program —
 
 Hello! My name is Michael and I'm a student in the Master of Urban Spatial Analytics Program at the University of Pennsylvania.
 
-I graduated from Vassar College with a BA in International Studies and recently completed a graduate certificate in GIS at The George Washington University.
-
 I'm passionate about turning complex urban data into intuitive, decision-ready tools that make a tangible impact on how cities are understood and managed.
 
 ## What You'll Find Here
@@ -23,4 +21,4 @@ I'm passionate about turning complex urban data into intuitive, decision-ready t
 ## Get in Touch
 
 - Email: mjpincus\@upenn.edu
-- GitHub: [\@](https://github.com/your-username)michaeljpincus
+- GitHub: [\@michaeljpincus](https://github.com/michaeljpincus)

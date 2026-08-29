@@ -4,23 +4,18 @@ title: "About Me"
 
 ## Background
 
-<!-- CHANGE THIS -->
+I graduated from Vassar College with a BA in International Studies and recently completed a graduate certificate in GIS at The George Washington University. 
 
-Write a few paragraphs about yourself here: where you came from before MUSA, what drew you to urban spatial analytics, and what you're hoping to do with it.
+I began the MUSA program at the University of Pennsylvania to combine my GIS experience with data science tools, including predictive modeling, model evaluation, and statistics, alongside coding languages like Python and JavaScript. With these tools, I look forward to building end-to-end systems that address pressing urban challenges.
 
 ## Skills
 
-<!-- CHANGE THIS: update this through the semester as it becomes true -->
-
-- **Languages & Tools:** R, Quarto, Git
+- **Languages & Tools:** R, Quarto, Git, Python, JavaScript
 - **Spatial:** (add as you learn)
 - **Data:** US Census / ACS via `tidycensus`
 
 ## Contact
 
-<!-- CHANGE THIS -->
+- Email: mjpincus\@upenn.edu
+- GitHub: [\@michaeljpincus](https://github.com/michaeljpincus)
 
-- Email: your-email\@upenn.edu
-- GitHub: [\@your-username](https://github.com/your-username)
-
-`I am testing code....`
