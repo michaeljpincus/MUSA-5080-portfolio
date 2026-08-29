@@ -14,8 +14,6 @@ I graduated from Vassar College with a BA in International Studies and recently 
 
 I'm passionate about turning complex urban data into intuitive, decision-ready tools that make a tangible impact on how cities are understood and managed.
 
-I'm a student in the MUSA program at Penn. My background is in \[YOUR BACKGROUND\], and I'm interested in \[YOUR INTERESTS\].
-
 ## What You'll Find Here
 
 - [**Weekly Notes**](weekly-notes/index.qmd) — what I'm learning each week
