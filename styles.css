@@ -8,8 +8,7 @@ h1, h2, h3, h4, h5, h6 {
   font-family: "Plus Jakarta Sans", sans-serif;
 }
 
-.quarto-post .metadata,
-.quarto-listing-default {
+div.quarto-post .metadata {
   font-family: "Plus Jakarta Sans", sans-serif;
 }
 
