@@ -8,6 +8,11 @@ h1, h2, h3, h4, h5, h6 {
   font-family: "Plus Jakarta Sans", sans-serif;
 }
 
+.quarto-post .metadata,
+.quarto-listing-default {
+  font-family: "Plus Jakarta Sans", sans-serif;
+}
+
 /* Keep code in its default/monospace font */
 code, pre, kbd, samp {
   font-family: monospace;
