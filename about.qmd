@@ -4,9 +4,17 @@ title: "About Me"
 
 ## Background
 
-I graduated from Vassar College with a BA in International Studies and recently completed a graduate certificate in GIS at The George Washington University. 
+I graduated from Vassar College with a BA in International Studies and recently completed a graduate certificate in GIS at The George Washington University.
 
 I began the MUSA program at the University of Pennsylvania to combine my GIS experience with data science tools, including predictive modeling, model evaluation, and statistics, alongside coding languages like Python and JavaScript. With these tools, I look forward to building end-to-end systems that address pressing urban challenges.
+
+::: {layout-ncol="3"}
+![](images/vassar.png){height="190px" width="190px" fig-align="center"}
+
+![](images/gwu.png){height="195px" width="195px" fig-align="center"}
+
+![](images/penn.png){height="220px" width="220px" fig-align="center"}
+:::
 
 ## Skills
 
@@ -18,4 +26,3 @@ I began the MUSA program at the University of Pennsylvania to combine my GIS exp
 
 - Email: mjpincus\@upenn.edu
 - GitHub: [\@michaeljpincus](https://github.com/michaeljpincus)
-
