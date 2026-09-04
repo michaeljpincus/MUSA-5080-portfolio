@@ -1,9 +1,11 @@
 {
-  "hash": "f6f04fb6df74d869f7c91826cc1ca929",
+  "hash": "157bdd7d898a6ed0da4166020c5deaf4",
   "result": {
     "engine": "knitr",
-    "markdown": "---\ntitle: \"Week 1: Getting Set Up\"\ndescription: \"First impressions, and getting the workflow running.\"\ndate: 2026-08-28\n---\n\n## What We Did\n\nSet up the portfolio workflow: made a repository from a template, cloned it with\nGitHub Desktop, edited files in RStudio, rendered with Quarto, and published to\nGitHub Pages.\n\n## Key Concepts\n\nThree places a file can live:\n\n1. **My computer** — where I edit\n2. **GitHub.com** — where it's stored\n3. **My live site** — what the world sees\n\nThe loop: **Edit → Save → Render → Commit → Push → wait → refresh**\n\n## Proving R Works\n\nThe chunk below runs when this page renders. If you can see a result underneath\nit on your published site, R and Quarto are talking to each other correctly.\n\n\n::: {.cell}\n\n```{.r .cell-code}\nsessionInfo()$R.version$version.string\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\n[1] \"R version 4.5.3 (2026-03-11)\"\n```\n\n\n:::\n:::\n\n\n",
-    "supporting": [],
+    "markdown": "---\ntitle: \"Week 1: Getting Set Up\"\ndescription: \"First impressions, and getting the workflow running.\"\ndate: 2026-08-28\n---\n\n## What We Did\n\nSet up the portfolio workflow: made a repository from a template, cloned it with GitHub Desktop, edited files in RStudio, rendered with Quarto, and published to GitHub Pages.\n\n## Key Concepts\n\nThree places a file can live:\n\n1.  **My computer** — where I edit\n2.  **GitHub.com** — where it's stored\n3.  **My live site** — what the world sees\n\nThe loop: **Edit → Save → Render → Commit → Push → wait → refresh**\n\n## Proving R Works\n\nThe chunk below runs when this page renders. If you can see a result underneath it on your published site, R and Quarto are talking to each other correctly.\n\n\n::: {.cell}\n\n```{.r .cell-code}\nsessionInfo()$R.version$version.string\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\n[1] \"R version 4.5.3 (2026-03-11)\"\n```\n\n\n:::\n:::\n\n",
+    "supporting": [
+      "week-01_files"
+    ],
     "filters": [
       "rmarkdown/pagebreak.lua"
     ],

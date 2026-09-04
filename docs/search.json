@@ -116,6 +116,27 @@
     "href": "weekly-notes/index.html",
     "title": "Weekly Notes",
     "section": "",
-    "text": "Notes from each week of MUSA 5080. New entries appear here automatically — add a .qmd file to this folder and render.\n\n\n\n\n\n\n\n\n\n\n\nWeek 1: Getting Set Up\n\n\nFirst impressions, and getting the workflow running.\n\n\n\n\n\nAug 28, 2026\n\n\n\n\n\nNo matching items"
+    "text": "Notes from each week of MUSA 5080. New entries appear here automatically — add a .qmd file to this folder and render.\n\n\n\n\n\n\n\n\n\n\n\nWeek 2: Getting started with R\n\n\nUsing dplyr and census data.\n\n\n\n\n\nSep 4, 2026\n\n\n\n\n\n\n\nWeek 1: Getting Set Up\n\n\nFirst impressions, and getting the workflow running.\n\n\n\n\n\nAug 28, 2026\n\n\n\n\n\nNo matching items"
+  },
+  {
+    "objectID": "weekly-notes/week-02.html",
+    "href": "weekly-notes/week-02.html",
+    "title": "Week 2: Getting started with R",
+    "section": "",
+    "text": "Quarto is a publishing system that mixes writing and code in one document.\n\nYou write in Markdown.\nYou embed R code in chunks.\nQuarto runs the code and weaves the output.\n\n\n\n\n\nQuarto helps us write HTML website without writing HTML code!\nAs a result, you don’t have as much control over your website."
+  },
+  {
+    "objectID": "weekly-notes/week-02.html#what-is-quarto",
+    "href": "weekly-notes/week-02.html#what-is-quarto",
+    "title": "Week 2: Getting started with R",
+    "section": "",
+    "text": "Quarto is a publishing system that mixes writing and code in one document.\n\nYou write in Markdown.\nYou embed R code in chunks.\nQuarto runs the code and weaves the output."
+  },
+  {
+    "objectID": "weekly-notes/week-02.html#how-is-quarto-different-than-a-from-scratch-html-website",
+    "href": "weekly-notes/week-02.html#how-is-quarto-different-than-a-from-scratch-html-website",
+    "title": "Week 2: Getting started with R",
+    "section": "",
+    "text": "Quarto helps us write HTML website without writing HTML code!\nAs a result, you don’t have as much control over your website."
   }
 ]
