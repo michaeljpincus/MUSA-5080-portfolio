@@ -8,7 +8,7 @@ website:
   description: "Public Policy Analytics portfolio"
 
   navbar:
-    title: "Portfolio"
+    title: "PPA Portfolio"
     left:
       - href: index.qmd
         text: Home

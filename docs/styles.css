@@ -16,3 +16,10 @@ div.quarto-post .metadata {
 code, pre, kbd, samp {
   font-family: monospace;
 }
+
+.navbar {
+  background-color: #44b0e3 !important;
+}
+.navbar-brand, .navbar-nav .nav-link {
+  color: #FFFFFF !important; /* or whatever contrasts well */
+}

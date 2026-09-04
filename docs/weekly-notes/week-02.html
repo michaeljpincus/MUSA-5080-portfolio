@@ -175,6 +175,17 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#what-is-quarto" id="toc-what-is-quarto" class="nav-link" data-scroll-target="#what-is-quarto">What is Quarto?</a></li>
   <li><a href="#how-is-quarto-different-than-a-from-scratch-html-website" id="toc-how-is-quarto-different-than-a-from-scratch-html-website" class="nav-link" data-scroll-target="#how-is-quarto-different-than-a-from-scratch-html-website">How is Quarto different than a from-scratch HTML website?</a></li>
   </ul></li>
+  <li><a href="#dplyr" id="toc-dplyr" class="nav-link" data-scroll-target="#dplyr"><code>dplyr</code></a>
+  <ul class="collapse">
+  <li><a href="#pipe-operator" id="toc-pipe-operator" class="nav-link" data-scroll-target="#pipe-operator">Pipe operator <code>|&gt;</code></a></li>
+  </ul></li>
+  <li><a href="#the-census" id="toc-the-census" class="nav-link" data-scroll-target="#the-census">The Census</a>
+  <ul class="collapse">
+  <li><a href="#census-code" id="toc-census-code" class="nav-link" data-scroll-target="#census-code">Census Code</a></li>
+  <li><a href="#census-geography" id="toc-census-geography" class="nav-link" data-scroll-target="#census-geography">Census Geography</a></li>
+  <li><a href="#geoid" id="toc-geoid" class="nav-link" data-scroll-target="#geoid">GEOID</a></li>
+  <li><a href="#using-tidycensus" id="toc-using-tidycensus" class="nav-link" data-scroll-target="#using-tidycensus">Using <code>tidycensus()</code></a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
@@ -188,7 +199,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <div>
   <div class="description">
-    Using dplyr and census data.
+    Using <code>dplyr</code> and census data.
   </div>
 </div>
 
@@ -211,10 +222,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<section id="weekly-questions" class="level1">
-<h1>Weekly Questions</h1>
-<section id="what-is-quarto" class="level2">
-<h2 data-anchor-id="what-is-quarto">What is Quarto?</h2>
+<section id="weekly-questions" class="level2">
+<h2 data-anchor-id="weekly-questions">Weekly Questions</h2>
+<section id="what-is-quarto" class="level3">
+<h3 data-anchor-id="what-is-quarto">What is Quarto?</h3>
 <p>Quarto is a publishing system that mixes writing and code in one document.</p>
 <ul>
 <li><p>You write in Markdown.</p></li>
@@ -222,12 +233,144 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li><p>Quarto runs the code and weaves the output.</p></li>
 </ul>
 </section>
-<section id="how-is-quarto-different-than-a-from-scratch-html-website" class="level2">
-<h2 data-anchor-id="how-is-quarto-different-than-a-from-scratch-html-website">How is Quarto different than a from-scratch HTML website?</h2>
+<section id="how-is-quarto-different-than-a-from-scratch-html-website" class="level3">
+<h3 data-anchor-id="how-is-quarto-different-than-a-from-scratch-html-website">How is Quarto different than a from-scratch HTML website?</h3>
 <ul>
 <li><p>Quarto helps us write HTML website without writing HTML code!</p></li>
 <li><p>As a result, you don’t have as much control over your website.</p></li>
 </ul>
+</section>
+</section>
+<section id="dplyr" class="level2">
+<h2 data-anchor-id="dplyr"><code>dplyr</code></h2>
+<p><code>dplyr</code> uses different verbs to work with tibbles.</p>
+<ul>
+<li><p><code>filter()</code> picks rows</p></li>
+<li><p><code>select()</code> picks columns</p></li>
+<li><p><code>mutate()</code> adds a new computed column:</p></li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>new <span class="ot">&lt;-</span> <span class="fu">mutate</span>(counties, income2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<ul>
+<li><p><code>arrange()</code> changes the order of rows</p></li>
+<li><p><code>group_by()</code> + <code>summarize()</code> many rows become few</p></li>
+</ul>
+<p>For example:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>County</th>
+<th style="text-align: right;">State</th>
+<th>Income</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Orange</td>
+<td style="text-align: right;">NY</td>
+<td>70,000</td>
+</tr>
+<tr class="even">
+<td>Nassau</td>
+<td style="text-align: right;">NY</td>
+<td>80,000</td>
+</tr>
+<tr class="odd">
+<td>Orange</td>
+<td style="text-align: right;">CA</td>
+<td>90,000</td>
+</tr>
+<tr class="even">
+<td>Sacramento</td>
+<td style="text-align: right;">CA</td>
+<td>100,000</td>
+</tr>
+</tbody>
+</table>
+<p>Becomes:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>State</th>
+<th>Income</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>NY</td>
+<td>70,000</td>
+</tr>
+<tr class="even">
+<td>CA</td>
+<td>80,000</td>
+</tr>
+</tbody>
+</table>
+<section id="pipe-operator" class="level3">
+<h3 data-anchor-id="pipe-operator">Pipe operator <code>|&gt;</code></h3>
+<p>We can think of <code>|&gt;</code> as saying “and then…”</p>
+<p>To use the pipe operator, we use ⌘ + Shift + M.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>new_data <span class="ot">&lt;-</span> counties <span class="sc">|&gt;</span> </span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(moe_pct <span class="sc">&gt;</span> <span class="dv">10</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(moe_pct)) <span class="sc">|&gt;</span> </span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(NAME, moe_pct)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+</section>
+<section id="the-census" class="level2">
+<h2 data-anchor-id="the-census">The Census</h2>
+<p><strong>Decennial Census</strong>: Mandated by the Constitution, conducted every 10 years with 10 questions.</p>
+<p><strong>American Community Survey (ACS)</strong>: Created in 2005, more interesting questions! Approximately 3% of households are surveyed about income, rent, home value, commute time, ethnicity, etc. From that sample, we come up with an estimate for the population.</p>
+<ul>
+<li><p><strong>1-year ACS</strong>: Almost never used, only for places &gt; 65,000 people. Most current, comes out every year.</p></li>
+<li><p><strong>5-year ACS</strong>: Block Group, Census Tract. If you get ACS data for the year 2016, it is a 5 year average. These are estimates +- a margin of error. It is <strong>NOT</strong> just an estimate for 2016, but for the interval of 2011-2016.</p></li>
+</ul>
+<section id="census-code" class="level3">
+<h3 data-anchor-id="census-code">Census Code</h3>
+<section id="b19013_001e-or-b19013_001m" class="level4">
+<h4 data-anchor-id="b19013_001e-or-b19013_001m">B19013_001E or B19013_001M</h4>
+<ul>
+<li><p>B: Base table</p></li>
+<li><p>19013: Table #</p></li>
+<li><p>001: Line Number</p></li>
+<li><p>E: Estimate</p></li>
+<li><p>M: Margin of Error</p></li>
+</ul>
+<p>The command <code>load_variables()</code> shows us the name of our variables. All of this exists in a library called <code>tidycensus()</code>.</p>
+</section>
+</section>
+<section id="census-geography" class="level3">
+<h3 data-anchor-id="census-geography">Census Geography</h3>
+<ul>
+<li><p>State -&gt; County -&gt; Tract (“Neighborhood”) -&gt; Block Groups (HORRIBLE margins of error!) -&gt; Block (Decennial Census only)</p></li>
+<li><p>About 5,000-8,000 people</p></li>
+<li><p>Boundaries of census tracts change over time! To mitigate this, there are longitudinal tract databases</p></li>
+</ul>
+</section>
+<section id="geoid" class="level3">
+<h3 data-anchor-id="geoid">GEOID</h3>
+<p>A GEOID is a unique identifier for a census tract.</p>
+<ul>
+<li><p>First two numbers is the state</p></li>
+<li><p>Next three numbers is the county</p></li>
+<li><p>Last six digits are the census tract</p></li>
+</ul>
+<p>A GEOID is stored as string. This is important, as there are states such as Alabama with a <code>01</code> state identifier.</p>
+</section>
+<section id="using-tidycensus" class="level3">
+<h3 data-anchor-id="using-tidycensus">Using <code>tidycensus()</code></h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">get_acs</span>(geography<span class="sc">:</span> <span class="st">'county'</span>,</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>                <span class="at">variables =</span> <span class="fu">c</span>(<span class="st">'B1013_001'</span>,</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>                              <span class="st">'B01003_001'</span>),</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>                <span class="at">state =</span> <span class="st">'PA'</span>,</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>                <span class="at">year =</span> <span class="dv">2023</span>,</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>                <span class="at">survey =</span> <span class="st">'acs5'</span>,</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>                <span class="at">output =</span> <span class="st">'wide'</span>) <span class="co">#To get our data in wide format </span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>When we run this command, we receive it in <strong>tidy</strong> format, with multiple rows for each county (each row shows a different variable value –&gt; “variable” itself is a column). We want to turn it into <strong>wide</strong> format, with different variables in each column.</p>
 
 
 <!-- -->
@@ -680,29 +823,141 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     }
   });
   </script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Week 2: Getting started with R"</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="an">description:</span><span class="co"> "Using dplyr and census data."</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="an">date:</span><span class="co"> 2026-09-04</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu"># Weekly Questions</span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="fu">## What is Quarto?  </span></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>Quarto is a publishing system that mixes writing and code in one document.</span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>You write in Markdown.</span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>You embed R code in chunks.</span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Quarto runs the code and weaves the output.</span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="fu">## How is Quarto different than a from-scratch HTML website?</span></span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Quarto helps us write HTML website without writing HTML code!</span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>As a result, you don't have as much control over your website.</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Week 2: Getting started with R"</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="an">description:</span><span class="co"> "Using `dplyr` and census data."</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="an">date:</span><span class="co"> 2026-09-04</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="fu">## Weekly Questions</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="fu">### What is Quarto?</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>Quarto is a publishing system that mixes writing and code in one document.</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>You write in Markdown.</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>You embed R code in chunks.</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Quarto runs the code and weaves the output.</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="fu">### How is Quarto different than a from-scratch HTML website?</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Quarto helps us write HTML website without writing HTML code!</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>As a result, you don't have as much control over your website.</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a><span class="fu">## `dplyr`</span></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a><span class="in">`dplyr`</span> uses different verbs to work with tibbles.</span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`filter()`</span> picks rows</span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`select()`</span> picks columns</span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`mutate()`</span> adds a new computed column:</span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false</span></span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a>new <span class="ot">&lt;-</span> <span class="fu">mutate</span>(counties, income2)</span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`arrange()`</span> changes the order of rows</span>
+<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`group_by()`</span> + <span class="in">`summarize()`</span> many rows become few</span>
+<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a>For example:</span>
+<span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> County     <span class="pp">|</span> State <span class="pp">|</span> Income  <span class="pp">|</span></span>
+<span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a><span class="pp">|------------|------:|---------|</span></span>
+<span id="cb4-50"><a href="#cb4-50" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Orange     <span class="pp">|</span>    NY <span class="pp">|</span> 70,000  <span class="pp">|</span></span>
+<span id="cb4-51"><a href="#cb4-51" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Nassau     <span class="pp">|</span>    NY <span class="pp">|</span> 80,000  <span class="pp">|</span></span>
+<span id="cb4-52"><a href="#cb4-52" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Orange     <span class="pp">|</span>    CA <span class="pp">|</span> 90,000  <span class="pp">|</span></span>
+<span id="cb4-53"><a href="#cb4-53" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Sacramento <span class="pp">|</span>    CA <span class="pp">|</span> 100,000 <span class="pp">|</span></span>
+<span id="cb4-54"><a href="#cb4-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-55"><a href="#cb4-55" aria-hidden="true" tabindex="-1"></a>Becomes:</span>
+<span id="cb4-56"><a href="#cb4-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-57"><a href="#cb4-57" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> State <span class="pp">|</span> Income <span class="pp">|</span></span>
+<span id="cb4-58"><a href="#cb4-58" aria-hidden="true" tabindex="-1"></a><span class="pp">|-------|--------|</span></span>
+<span id="cb4-59"><a href="#cb4-59" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> NY    <span class="pp">|</span> 70,000 <span class="pp">|</span></span>
+<span id="cb4-60"><a href="#cb4-60" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> CA    <span class="pp">|</span> 80,000 <span class="pp">|</span></span>
+<span id="cb4-61"><a href="#cb4-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-62"><a href="#cb4-62" aria-hidden="true" tabindex="-1"></a><span class="fu">### Pipe operator `|&gt;`</span></span>
+<span id="cb4-63"><a href="#cb4-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-64"><a href="#cb4-64" aria-hidden="true" tabindex="-1"></a>We can think of <span class="in">`|&gt;`</span> as saying "and then..."</span>
+<span id="cb4-65"><a href="#cb4-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-66"><a href="#cb4-66" aria-hidden="true" tabindex="-1"></a>To use the pipe operator, we use ⌘ + Shift + M.</span>
+<span id="cb4-67"><a href="#cb4-67" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-70"><a href="#cb4-70" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb4-71"><a href="#cb4-71" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false</span></span>
+<span id="cb4-72"><a href="#cb4-72" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-73"><a href="#cb4-73" aria-hidden="true" tabindex="-1"></a>new_data <span class="ot">&lt;-</span> counties <span class="sc">|&gt;</span> </span>
+<span id="cb4-74"><a href="#cb4-74" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(moe_pct <span class="sc">&gt;</span> <span class="dv">10</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb4-75"><a href="#cb4-75" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(moe_pct)) <span class="sc">|&gt;</span> </span>
+<span id="cb4-76"><a href="#cb4-76" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(NAME, moe_pct)</span>
+<span id="cb4-77"><a href="#cb4-77" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb4-78"><a href="#cb4-78" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-79"><a href="#cb4-79" aria-hidden="true" tabindex="-1"></a><span class="fu">## The Census</span></span>
+<span id="cb4-80"><a href="#cb4-80" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-81"><a href="#cb4-81" aria-hidden="true" tabindex="-1"></a>**Decennial Census**: Mandated by the Constitution, conducted every 10 years with 10 questions.</span>
+<span id="cb4-82"><a href="#cb4-82" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-83"><a href="#cb4-83" aria-hidden="true" tabindex="-1"></a>**American Community Survey (ACS)**: Created in 2005, more interesting questions! Approximately 3% of households are surveyed about income, rent, home value, commute time, ethnicity, etc. From that sample, we come up with an estimate for the population.</span>
+<span id="cb4-84"><a href="#cb4-84" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-85"><a href="#cb4-85" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**1-year ACS**: Almost never used, only for places <span class="sc">\&gt;</span> 65,000 people. Most current, comes out every year.</span>
+<span id="cb4-86"><a href="#cb4-86" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-87"><a href="#cb4-87" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**5-year ACS**: Block Group, Census Tract. If you get ACS data for the year 2016, it is a 5 year average. These are estimates +- a margin of error. It is **NOT** just an estimate for 2016, but for the interval of 2011-2016.</span>
+<span id="cb4-88"><a href="#cb4-88" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-89"><a href="#cb4-89" aria-hidden="true" tabindex="-1"></a><span class="fu">### Census Code</span></span>
+<span id="cb4-90"><a href="#cb4-90" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-91"><a href="#cb4-91" aria-hidden="true" tabindex="-1"></a><span class="fu">#### B19013_001E or B19013_001M</span></span>
+<span id="cb4-92"><a href="#cb4-92" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-93"><a href="#cb4-93" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>B: Base table</span>
+<span id="cb4-94"><a href="#cb4-94" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-95"><a href="#cb4-95" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>19013: Table <span class="sc">\#</span></span>
+<span id="cb4-96"><a href="#cb4-96" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-97"><a href="#cb4-97" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>001: Line Number</span>
+<span id="cb4-98"><a href="#cb4-98" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-99"><a href="#cb4-99" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>E: Estimate</span>
+<span id="cb4-100"><a href="#cb4-100" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-101"><a href="#cb4-101" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>M: Margin of Error</span>
+<span id="cb4-102"><a href="#cb4-102" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-103"><a href="#cb4-103" aria-hidden="true" tabindex="-1"></a>The command <span class="in">`load_variables()`</span> shows us the name of our variables. All of this exists in a library called <span class="in">`tidycensus()`</span>.</span>
+<span id="cb4-104"><a href="#cb4-104" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-105"><a href="#cb4-105" aria-hidden="true" tabindex="-1"></a><span class="fu">### Census Geography</span></span>
+<span id="cb4-106"><a href="#cb4-106" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-107"><a href="#cb4-107" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>State -<span class="sc">\&gt;</span> County -<span class="sc">\&gt;</span> Tract ("Neighborhood") -<span class="sc">\&gt;</span> Block Groups (HORRIBLE margins of error!) -<span class="sc">\&gt;</span> Block (Decennial Census only)</span>
+<span id="cb4-108"><a href="#cb4-108" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-109"><a href="#cb4-109" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>About 5,000-8,000 people</span>
+<span id="cb4-110"><a href="#cb4-110" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-111"><a href="#cb4-111" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Boundaries of census tracts change over time! To mitigate this, there are longitudinal tract databases</span>
+<span id="cb4-112"><a href="#cb4-112" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-113"><a href="#cb4-113" aria-hidden="true" tabindex="-1"></a><span class="fu">### GEOID</span></span>
+<span id="cb4-114"><a href="#cb4-114" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-115"><a href="#cb4-115" aria-hidden="true" tabindex="-1"></a>A GEOID is a unique identifier for a census tract.</span>
+<span id="cb4-116"><a href="#cb4-116" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-117"><a href="#cb4-117" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>First two numbers is the state</span>
+<span id="cb4-118"><a href="#cb4-118" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-119"><a href="#cb4-119" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Next three numbers is the county</span>
+<span id="cb4-120"><a href="#cb4-120" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-121"><a href="#cb4-121" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Last six digits are the census tract</span>
+<span id="cb4-122"><a href="#cb4-122" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-123"><a href="#cb4-123" aria-hidden="true" tabindex="-1"></a>A GEOID is stored as string. This is important, as there are states such as Alabama with a <span class="in">`01`</span> state identifier.</span>
+<span id="cb4-124"><a href="#cb4-124" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-125"><a href="#cb4-125" aria-hidden="true" tabindex="-1"></a><span class="fu">### Using `tidycensus()`</span></span>
+<span id="cb4-126"><a href="#cb4-126" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-129"><a href="#cb4-129" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb4-130"><a href="#cb4-130" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false</span></span>
+<span id="cb4-131"><a href="#cb4-131" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">get_acs</span>(geography<span class="sc">:</span> <span class="st">'county'</span>,</span>
+<span id="cb4-132"><a href="#cb4-132" aria-hidden="true" tabindex="-1"></a>                <span class="at">variables =</span> <span class="fu">c</span>(<span class="st">'B1013_001'</span>,</span>
+<span id="cb4-133"><a href="#cb4-133" aria-hidden="true" tabindex="-1"></a>                              <span class="st">'B01003_001'</span>),</span>
+<span id="cb4-134"><a href="#cb4-134" aria-hidden="true" tabindex="-1"></a>                <span class="at">state =</span> <span class="st">'PA'</span>,</span>
+<span id="cb4-135"><a href="#cb4-135" aria-hidden="true" tabindex="-1"></a>                <span class="at">year =</span> <span class="dv">2023</span>,</span>
+<span id="cb4-136"><a href="#cb4-136" aria-hidden="true" tabindex="-1"></a>                <span class="at">survey =</span> <span class="st">'acs5'</span>,</span>
+<span id="cb4-137"><a href="#cb4-137" aria-hidden="true" tabindex="-1"></a>                <span class="at">output =</span> <span class="st">'wide'</span>) <span class="co">#To get our data in wide format </span></span>
+<span id="cb4-138"><a href="#cb4-138" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb4-139"><a href="#cb4-139" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-140"><a href="#cb4-140" aria-hidden="true" tabindex="-1"></a>When we run this command, we receive it in **tidy** format, with multiple rows for each county (each row shows a different variable value –\&gt; "variable" itself is a column). We want to turn it into **wide** format, with different variables in each column.</span>
+</code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
 

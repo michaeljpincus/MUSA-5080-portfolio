@@ -1,12 +1,12 @@
 ---
 title: "Week 2: Getting started with R"
-description: "Using dplyr and census data."
+description: "Using `dplyr` and census data."
 date: 2026-09-04
 ---
 
-# Weekly Questions
+## Weekly Questions
 
-## What is Quarto?  
+### What is Quarto?
 
 Quarto is a publishing system that mixes writing and code in one document.
 
@@ -16,8 +16,119 @@ Quarto is a publishing system that mixes writing and code in one document.
 
 - Quarto runs the code and weaves the output.
 
-## How is Quarto different than a from-scratch HTML website?
+### How is Quarto different than a from-scratch HTML website?
 
 - Quarto helps us write HTML website without writing HTML code!
 
 - As a result, you don't have as much control over your website.
+
+## `dplyr`
+
+`dplyr` uses different verbs to work with tibbles.
+
+- `filter()` picks rows
+
+- `select()` picks columns
+
+- `mutate()` adds a new computed column:
+
+```{r}
+#| eval: false
+new <- mutate(counties, income2)
+```
+
+- `arrange()` changes the order of rows
+
+- `group_by()` + `summarize()` many rows become few
+
+For example:
+
+| County     | State | Income  |
+|------------|------:|---------|
+| Orange     |    NY | 70,000  |
+| Nassau     |    NY | 80,000  |
+| Orange     |    CA | 90,000  |
+| Sacramento |    CA | 100,000 |
+
+Becomes:
+
+| State | Income |
+|-------|--------|
+| NY    | 70,000 |
+| CA    | 80,000 |
+
+### Pipe operator `|>`
+
+We can think of `|>` as saying "and then..."
+
+To use the pipe operator, we use ⌘ + Shift + M.
+
+```{r}
+#| eval: false
+
+new_data <- counties |> 
+  filter(moe_pct > 10) |> 
+  arrange(desc(moe_pct)) |> 
+  select(NAME, moe_pct)
+```
+
+## The Census
+
+**Decennial Census**: Mandated by the Constitution, conducted every 10 years with 10 questions.
+
+**American Community Survey (ACS)**: Created in 2005, more interesting questions! Approximately 3% of households are surveyed about income, rent, home value, commute time, ethnicity, etc. From that sample, we come up with an estimate for the population.
+
+- **1-year ACS**: Almost never used, only for places \> 65,000 people. Most current, comes out every year.
+
+- **5-year ACS**: Block Group, Census Tract. If you get ACS data for the year 2016, it is a 5 year average. These are estimates +- a margin of error. It is **NOT** just an estimate for 2016, but for the interval of 2011-2016.
+
+### Census Code
+
+#### B19013_001E or B19013_001M
+
+- B: Base table
+
+- 19013: Table \#
+
+- 001: Line Number
+
+- E: Estimate
+
+- M: Margin of Error
+
+The command `load_variables()` shows us the name of our variables. All of this exists in a library called `tidycensus()`.
+
+### Census Geography
+
+- State -\> County -\> Tract ("Neighborhood") -\> Block Groups (HORRIBLE margins of error!) -\> Block (Decennial Census only)
+
+- About 5,000-8,000 people
+
+- Boundaries of census tracts change over time! To mitigate this, there are longitudinal tract databases
+
+### GEOID
+
+A GEOID is a unique identifier for a census tract.
+
+- First two numbers is the state
+
+- Next three numbers is the county
+
+- Last six digits are the census tract
+
+A GEOID is stored as string. This is important, as there are states such as Alabama with a `01` state identifier.
+
+### Using `tidycensus()`
+
+```{r}
+#| eval: false
+data <- get_acs(geography: 'county',
+                variables = c('B1013_001',
+                              'B01003_001'),
+                state = 'PA',
+                year = 2023,
+                survey = 'acs5',
+                output = 'wide') #To get our data in wide format 
+```
+
+When we run this command, we receive it in **tidy** format, with multiple rows for each county (each row shows a different variable value –\> "variable" itself is a column). We want to turn it into **wide** format, with different variables in each column.
