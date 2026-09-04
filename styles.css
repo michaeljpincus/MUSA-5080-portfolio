@@ -18,23 +18,30 @@ code, pre, kbd, samp {
 }
 
 .navbar {
-  background-color: #fc4503!important;
+  background-color: #bf3115!important;
 }
 .navbar-brand, .navbar-nav .nav-link {
-  color: #FFFFFF !important; /* or whatever contrasts well */
+  color: #fce5e1!important;
+  font-weight: bold;/* or whatever contrasts well */
+}
+
+.navbar-brand:hover,
+.navbar-nav .nav-link:hover {
+  color: #FFFFFF !important;
+  font-weight: bold;
 }
 
 code:not(pre code) {
-  color: #d43a02 !important;
+  color: #2c5a9e!important;
 }
 
 .sidebar nav[role="doc-toc"] ul > li > a:hover,
 .sidebar nav[role="doc-toc"] ul > li > ul > li > a:hover {
-  color: #fc4503 !important;
-  border-left: 1px solid #fc4503;
+  color: #bf3115 !important;
+  border-left: 1px solid #bf3115;
 }
 
 .sidebar nav[role=doc-toc] ul>li>a.active, .sidebar nav[role=doc-toc] ul>li>ul>li>a.active {
-    border-left: 1px solid #fc4503;
-    color: #fc4503 !important;
+    border-left: 1px solid #bf3115;
+    color: #bf3115 !important;
 }
