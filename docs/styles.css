@@ -18,8 +18,23 @@ code, pre, kbd, samp {
 }
 
 .navbar {
-  background-color: #44b0e3 !important;
+  background-color: #fc4503!important;
 }
 .navbar-brand, .navbar-nav .nav-link {
   color: #FFFFFF !important; /* or whatever contrasts well */
+}
+
+code:not(pre code) {
+  color: #d43a02 !important;
+}
+
+.sidebar nav[role="doc-toc"] ul > li > a:hover,
+.sidebar nav[role="doc-toc"] ul > li > ul > li > a:hover {
+  color: #fc4503 !important;
+  border-left: 1px solid #fc4503;
+}
+
+.sidebar nav[role=doc-toc] ul>li>a.active, .sidebar nav[role=doc-toc] ul>li>ul>li>a.active {
+    border-left: 1px solid #fc4503;
+    color: #fc4503 !important;
 }
