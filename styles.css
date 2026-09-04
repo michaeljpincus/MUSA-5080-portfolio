@@ -21,7 +21,7 @@ code, pre, kbd, samp {
   background-color: #bf3115!important;
 }
 .navbar-brand, .navbar-nav .nav-link {
-  color: #fce5e1!important;
+  color: #fce5e1 !important;
   font-weight: bold;/* or whatever contrasts well */
 }
 
@@ -45,3 +45,11 @@ code:not(pre code) {
     border-left: 1px solid #bf3115;
     color: #bf3115 !important;
 }
+
+.navbar #quarto-search.type-overlay .aa-Autocomplete svg.aa-SubmitIcon {
+    width: 26px;
+    height: 26px;
+    color: #fce5e1;
+    opacity: 1;
+}
+
