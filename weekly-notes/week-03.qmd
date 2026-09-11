@@ -93,7 +93,7 @@ $$\text{CV}=\frac{\text{Standard Error}}{\text{estimate}} \times 100$$
 
 Standard Errors come from a calculation of how many people you asked, and how varied that sample is. To get a standard error using a 90% confidence interval:
 
-$$\text{Standard Error} = \frac{\text{Margin of Error (E)}}{1.645}$$
+$$\text{Standard Error} = \frac{\text{Margin of Error }(E)}{1.645}$$
 
 For a sample of 10,000:
 
@@ -105,7 +105,7 @@ For a sample of 10,000:
 
 ### Derived Uncertainty
 
-$$\text{Poverty rate}=\frac{\text{\# in Poverty}\pm\text{E}}{\text{Total Population}\pm{\text{E}}} $$
+$$\text{Poverty rate}=\frac{\text{\# in Poverty}\pm E}{\text{Total Population}\pm E} $$
 
 ### In R:
 
