@@ -3,6 +3,9 @@ title: "Week 3: Margins of error and `ggplot2`"
 editor: visual
 description: "Making things visual!"
 date: 09-11-2026
+format:
+  html:
+    toc: true
 ---
 
 ## Building Visualizations
@@ -119,27 +122,39 @@ $$\text{Poverty rate}=\frac{\text{\# in Poverty}\pm\text{E}}{\text{Total Populat
 
 We can't take the difference between estimates as the absolute change between intervals **without taking into account margin of error** $E$.
 
-### The Standard Error of Difference 
+### The Standard Error of Difference
 
 $$SE_{\text{diff}}=\sqrt{(SE_1)^2 +(SE_2)^2}$$
 
-::: {callout-note}
-**Example:**
-
+::: {.callout-note title="Example"}
 1.  2014-2018: \$45,000 $\pm$ 8,000
 2.  2019-2023: \$62,000 $\pm$ 11,000
 
 We want to know if these estimates are truly different from one another.
 
-$$SE_{\text{diff}}=\sqrt{(\frac{8,000}{1.645})^2+(\frac{11,000}{1.645})^2} \approx 8,626$$
+$$SE_{\text{diff}}=\sqrt{(\frac{8{,}000}{1.645})^2+(\frac{11{,}000}{1.645})^2} \approx 8,626$$
 
 $$\text{Difference}=\pm(1.645\times SE_{\text{diff}})$$
 
-$$\text{Interval}=17,000\pm (1.645 \times 8,268)=17,000\pm13,601 =[3,399,        30,601]$$
+$$\text{Interval}=17{,}000\pm (1.645 \times 8{,}268)=17{,}000\pm13{,}601 =[3{,}399,\ 30{,}601]$$
 
-$$Z = \frac{62,000-45,000}{SE_{\text{diff}}} \approx 2.06 $$
+$$Z = \frac{62{,}000-45{,}000}{SE_{\text{diff}}} \approx 2.06 $$
 
-Since the 90% confidence interval for the difference, \[3,399, 30,601\], doesn't contain zero (equivalently, $Z \approx 2.06 > 1.645$), we can say with 90% confidence that the estimate genuinely increased from 2014–2018 to 2019–2023.
+Since the 90% confidence interval for the difference $[3{,}399,\ 30{,}601]$ doesn't contain zero (equivalently, $Z \approx 2.06 > 1.645$), we can say with 90% confidence that the estimate genuinely increased from 2014–2018 to 2019–2023.
 :::
 
-### 
+Code from the practice exercise:
+
+```{r}
+#| eval: false 
+poverty_tested <- poverty_wide %>%
+  mutate(
+    change   = `estimate_2019-2023` - `estimate_2014-2018`,
+    se_1     = `moe_2014-2018` / 1.645,
+    se_2     = `moe_2019-2023` / 1.645,
+    se_diff  = sqrt(se_1^2 + se_2^2),
+    moe_diff = se_diff * 1.645,
+    z        = change / se_diff,
+    significant = abs(z) > 1.645
+  )
+```
