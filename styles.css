@@ -1,20 +1,29 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=News+Cycle:wght@400;700&display=swap');
+body, p, li, td {
+  font-family: "Google Sans", sans-serif;
+}
 
-body, p, li, td, .navbar, .sidebar {
-  font-family: "Plus Jakarta Sans", sans-serif;
+.navbar, .sidebar {
+  font-family: "Google Sans" sans-serif;
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: "Plus Jakarta Sans", sans-serif;
+  font-family: "Google Sans", sans-serif;
 }
 
 div.quarto-post .metadata {
-  font-family: "Plus Jakarta Sans", sans-serif;
+  font-family: "Google Sans", sans-serif;
 }
 
-/* Keep code in its default/monospace font */
-code, pre, kbd, samp {
-  font-family: monospace;
+code,
+pre,
+pre code,
+code.sourceCode,
+pre.sourceCode,
+kbd,
+samp {
+  font-family: Monaco, Menlo, Consolas, "Courier New", monospace !important;
 }
 
 .navbar {
@@ -22,7 +31,7 @@ code, pre, kbd, samp {
 }
 .navbar-brand, .navbar-nav .nav-link {
   color: #fce5e1 !important;
-  font-weight: bold;/* or whatever contrasts well */
+  font-weight: bold;
 }
 
 .navbar-brand:hover,
@@ -30,6 +39,7 @@ code, pre, kbd, samp {
   color: #FFFFFF !important;
   font-weight: bold;
 }
+
 
 code:not(pre code) {
   color: #2c5a9e!important;

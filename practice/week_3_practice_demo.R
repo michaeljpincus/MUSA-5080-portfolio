@@ -51,8 +51,7 @@ county_data %>%
   ggplot(aes(x = NAME, y = estimate)) +
   geom_col() +
   geom_errorbar(aes(ymin = estimate - moe, ymax = estimate + moe)) +
-  coord_flip() +
-  theme
+  coord_flip()
 
 ## Sort bars by bar length rather than alphabetically:
 county_data %>%
