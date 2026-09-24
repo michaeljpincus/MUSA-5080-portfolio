@@ -115,11 +115,11 @@ ny <- st_read('assignments/counties/Counties_Shoreline.shp') %>%
   mutate(status = case_when(
     significant == TRUE & change > 0  ~ "Increase",
     significant == TRUE & change <= 0 ~ "Decrease",
-    TRUE                              ~ "Non-Significant Estimate"
+    TRUE                              ~ "Non-significant estimate"
   ))
 
 sig_counties <- ny %>%
-  filter(status != "Non-Significant Estimate")
+  filter(status != "Non-significant estimate")
 ```
 
 ```{r}
@@ -143,12 +143,12 @@ ggplot(ny) +
   scale_fill_manual(
     values = c("Increase"        = "#2c7fb8",
                "Decrease"        = "#d95f0e",
-               "Non-Significant Estimate" = "lightgrey"),
-    breaks = c("Increase", "Decrease", "Non-Significant Estimate"),
+               "Non-significant estimate" = "lightgrey"),
+    breaks = c("Increase", "Decrease", "Non-significant estimate"),
     name   = "Change"
   ) + 
   labs(
-    title = 'Statistically Significant Change in Median Household Income',
+    title = 'Statistically significant change in median household income',
     subtitle = "2015–2019 vs 2020–2024, ACS 5-year estimates",
     fill = 'Change in Median Household Income'
   ) +
