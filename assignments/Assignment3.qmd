@@ -1,0 +1,241 @@
+---
+title: "Verify the Claim: NYS Median Household Income"
+author: "Michael Pincus"
+description: "Analyzing a report by the NYS Comptroller"
+date: 09-21-2026
+format:
+  html:
+    toc: true
+    code-fold: true
+    code-summary: "Show code"
+    embed-resources: true
+---
+
+On May 08, 2026, the Office of the New York State Comproller published a [report](https://www.osc.ny.gov/reports/median-income) titled *"For Many New Yorkers, Incomes Not Keeping Pace with Inflation."*
+
+The report cited that in 23 of the state's 62 counties, real median household income decreased from 2019 to 2024 according to the U.S. Census Bureau's American Community Survey 5-year Estimates.
+
+This article aims to analyze the claims of the report, analyzing the statistical significance and reliability the data presented.
+
+## Reconstructing the report
+
+To start, the Median Household Income (code `B19013_001`) table was retrieved for both the 2019 and 2024 ACS 5-year Estimate (code `acs5`).
+
+To adjust for inflation between 2019 and 2024, the `estimate` and margin of error (`moe`) were multiplied by a `factor` of `1.231`. While this exact calculation was not detailed in the report, it was assumed based on the [data](https://www.bls.gov/cpi/research-series/) from the Consumer Price Index Research Retroactive Series.
+
+```{r}
+library(tidyverse)
+library(tidycensus)
+library(sf)
+
+infl_2024 <- c(`2019` = 1.231, `2024` = 1.000)
+
+get_inc <- function(yr) {
+  get_acs(
+    geography = "county",
+    variables = "B19013_001",
+    state     = "NY",
+    year      = yr,
+    survey    = "acs5") %>%
+    mutate(
+      period = paste0(yr - 4, "-", yr),
+      factor = infl_2024[[as.character(yr)]],
+      estimate = estimate * factor,
+      moe = moe * factor)
+}
+
+inc2019 <- get_inc(2019)
+inc2024 <- get_inc(2024)
+```
+
+For each county, the change between `estimate`s and `moe`s from 2019 to 2024 was calculated. The statistical significance of each difference was then calculated via the calculation of the standard error (`se_1` & `se_2`) as well as the standard error of the difference (`se_diff`).
+
+Counties with differences statistically distinguishable from zero at a 90% confidence were flagged if the absolute value of their resulting `z` score was calculated as above `1.645`.
+
+```{r}
+inc_change <- bind_rows(inc2019, inc2024)
+
+inc_wide <- inc_change %>%
+  select(GEOID, NAME, period, estimate, moe) %>%
+  pivot_wider(
+    names_from  = period,
+    values_from = c(estimate, moe)
+  )
+
+inc_tested <- inc_wide %>%
+  mutate(
+    change   = `estimate_2020-2024` - `estimate_2015-2019`,
+    se_1     = `moe_2015-2019` / 1.645,
+    se_2     = `moe_2020-2024` / 1.645,
+    se_diff  = sqrt(se_1^2 + se_2^2),
+    moe_diff = se_diff * 1.645,
+    z        = change / se_diff,
+    significant = abs(z) > 1.645
+  )
+```
+
+Based on this criteria, only 16 counties had a difference of median household income statistically distinguishable from 0 (roughly 25% of counties):
+
+```{r}
+inc_tested %>% count(significant)
+```
+
+Of these 16 counties, 10 saw an increase in median household income, while 6 saw a decrease:
+
+```{r}
+inc_tested %>%
+  filter(significant) %>%
+  mutate(NAME = str_remove(NAME, " County, New York")) %>%
+  ggplot(aes(x = reorder(NAME, change), y = change)) +
+  geom_col(aes(fill = change > 0)) +
+  geom_errorbar(aes(ymin = change - moe_diff,
+                    ymax = change + moe_diff), width = 0.3) +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  scale_fill_manual(
+    values = c("TRUE" = "#2c7fb8", "FALSE" = "#d95f0e"),
+    labels = c("TRUE" = "Increase", "FALSE" = "Decrease"),
+    name   = "Change"
+  ) +
+  coord_flip() +
+  theme_minimal() +
+  labs(title = "Statistically significant change in median household income",
+       subtitle = "2015–2019 vs 2020–2024, ACS 5-year estimates",
+       x = NULL, y = "Change in median household income")
+```
+
+```{r}
+#| output: false
+library(ggrepel)
+
+significant <- inc_tested %>%
+  filter(significant == TRUE)
+
+ny <- st_read('assignments/counties/Counties_Shoreline.shp') %>%
+  left_join(significant, by = c('FIPS_CODE' = 'GEOID')) %>%
+  mutate(status = case_when(
+    significant == TRUE & change > 0  ~ "Increase",
+    significant == TRUE & change <= 0 ~ "Decrease",
+    TRUE                              ~ "Non-Significant Estimate"
+  ))
+
+sig_counties <- ny %>%
+  filter(status != "Non-Significant Estimate")
+```
+
+```{r}
+ggplot(ny) +
+  geom_sf(aes(fill = status), color = "white", linewidth = 0.2) +
+  geom_text_repel(
+    data = sig_counties,
+    aes(label = NAME.x, geometry = geometry),
+    stat = "sf_coordinates",
+    size = 3,
+    bg.color='white',
+    bg.r=0.2,
+    min.segment.length = 0.3,
+    box.padding = 0.4,
+    point.padding = 0.4,
+    fontface = 'bold',
+    force = 3,
+    max.overlaps = Inf,
+    segment.color = "grey30"
+  ) +
+  scale_fill_manual(
+    values = c("Increase"        = "#2c7fb8",
+               "Decrease"        = "#d95f0e",
+               "Non-Significant Estimate" = "lightgrey"),
+    breaks = c("Increase", "Decrease", "Non-Significant Estimate"),
+    name   = "Change"
+  ) + 
+  labs(
+    title = 'Statistically Significant Change in Median Household Income',
+    subtitle = "2015–2019 vs 2020–2024, ACS 5-year estimates",
+    fill = 'Change in Median Household Income'
+  ) +
+theme_void()
+```
+
+## Reliability of ACY 5YE Data
+
+While only 16 counties showed a statistically significant difference in median household income, all 62 counties showed reliable estimates through the calculation of the coefficient of variation.
+
+*Reliability thresholds follow Jurjevich et al. (2018): CV \< 12% reliable, 12–40% somewhat reliable, \> 40% unreliable.*
+
+```{r}
+reliability_table <- inc_tested %>%
+  mutate(
+    `cv_2015-2019` = (`moe_2015-2019` / 1.645) / `estimate_2015-2019` * 100,
+    `dot_2015-2019` = case_when(
+      `cv_2015-2019` < 12  ~ "🟢",
+      `cv_2015-2019` <= 40 ~ "🟡",
+      TRUE     ~ "🔴"
+    ),
+    `flag_2015-2019` = case_when(
+      `cv_2015-2019` < 12  ~ "Reliable",
+      `cv_2015-2019` <= 40 ~ "Somewhat reliable",
+      TRUE     ~ "Unreliable"
+    ),
+    NAME = str_remove(NAME, " County, New York"),
+    `cv_2020-2024` = (`moe_2020-2024` / 1.645) / `estimate_2020-2024` * 100,
+    `dot_2020-2024` = case_when(
+      `cv_2020-2024` < 12  ~ "🟢",
+      `cv_2020-2024` <= 40 ~ "🟡",
+      TRUE     ~ "🔴"
+    ),
+    `flag_2020-2024` = case_when(
+      `cv_2020-2024` < 12  ~ "Reliable",
+      `cv_2020-2024` <= 40 ~ "Somewhat reliable",
+      TRUE     ~ "Unreliable"
+    ),
+  ) %>%
+  arrange(NAME) %>%
+  select(`dot_2015-2019`, `dot_2020-2024`, NAME, `estimate_2015-2019`, `estimate_2020-2024`, `moe_2015-2019`, `moe_2020-2024`, `cv_2015-2019`, `cv_2020-2024`, `flag_2015-2019`, `flag_2020-2024`)
+```
+
+```{r}
+library(gt)
+
+reliability_table %>%
+  gt() %>%
+  fmt_number(columns = c(`estimate_2015-2019`, `estimate_2020-2024`,
+                         `moe_2015-2019`, `moe_2020-2024`),
+             decimals = 0) %>%
+  fmt_number(columns = c(`cv_2015-2019`, `cv_2020-2024`), decimals = 1) %>%
+  cols_label(
+    `dot_2015-2019`      = "",
+    `dot_2020-2024`      = "",
+    NAME                 = "County",
+    `estimate_2015-2019` = "Estimate",
+    `estimate_2020-2024` = "Estimate",
+    `moe_2015-2019`      = "MOE",
+    `moe_2020-2024`      = "MOE",
+    `cv_2015-2019`       = "CV (%)",
+    `cv_2020-2024`       = "CV (%)",
+    `flag_2015-2019`     = "Reliability",
+    `flag_2020-2024`     = "Reliability"
+  ) %>%
+  tab_spanner(
+    label   = "2015-2019",
+    columns = c(`dot_2015-2019`, `estimate_2015-2019`, `moe_2015-2019`, `cv_2015-2019`, `flag_2015-2019`)
+  ) %>%
+  tab_spanner(
+    label   = "2020-2024",
+    columns = c(`dot_2020-2024`, `estimate_2020-2024`, `moe_2020-2024`, `cv_2020-2024`, `flag_2020-2024`)
+  ) %>%
+  cols_align(align = "center", columns = c(`dot_2015-2019`, `dot_2020-2024`)) %>%
+  tab_header(
+    title    = "Median Household Income",
+    subtitle = "New York counties, ACS 2015-2019 & 2020-2024 5-year estimates"
+  ) %>%
+  tab_source_note(
+    "Reliability thresholds follow Jurjevich et al. (2018): CV < 12% reliable, 12–40% somewhat reliable, > 40% unreliable."
+  )
+```
+
+## Conclusion
+
+The report by the NYS Comptroller makes several statistically defensible claims, notably that many counties indeed saw a decrease in median household income between 2019 and 2024. The counties the report names with the highest decrease (Rockland and Chemung) and increase (Greene and Ulster) were all statistically significant with 90% confidence. Furthermore, all counties featured reliable ACS 5-year Estimate data.
+
+The article falls short in mentioning the lack of statistical significance in all but 16 counties. While the report features a map of all 62 counties and their % change for each, it neglects to note how most of the counties in New York featured differences likely the artefact of sampling noise.
+
+*Disclaimer: while the differences were examined using an inflation adjustment of `1.231`, exact methodological replication cannot be determined without the precise calculations used in the original report.*
