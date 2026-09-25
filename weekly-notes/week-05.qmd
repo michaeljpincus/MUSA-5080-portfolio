@@ -1,12 +1,14 @@
 ---
-title: "Week 5"
+title: "Week 5: Intro to Machine Learning"
+date: 09-25-2026
+description: "Beyond statistical inference"
 editor: visual
 ---
 
 ## Where do rents exceed our expectations?
 
 | `GEOID` | `med_rent` | `med_inc` | `pct_renters` | `pct_ba` | `n_stations` | `rent_cv` | `geometry` |
-|----|----|----|----|----|----|----|----|
+|---------|---------|---------|---------|---------|---------|---------|---------|
 | `100` | `1650` | `8200` | `0.71` | `0.64` | `3` | `9.8` | `((...))` |
 
 | Income    | Rent    |
