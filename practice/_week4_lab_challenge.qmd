@@ -371,7 +371,7 @@ You now have three different definitions of "has access":
 ### Scoring (for bragging rights, not grades)
 
 |   | Points |
-|------------------------------------|------------------------------------|
+|----|----|
 | Count is correct *for your stated definitions* | 2 |
 | Map shows the right tracts and the stations, with a title that states your definitions | 2 |
 | Reliability breakdown included | 1 |
