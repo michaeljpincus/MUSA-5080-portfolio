@@ -6,7 +6,7 @@ editor: visual
 ## Where do rents exceed our expectations?
 
 | `GEOID` | `med_rent` | `med_inc` | `pct_renters` | `pct_ba` | `n_stations` | `rent_cv` | `geometry` |
-|-------|---------|---------|------------|--------|-----------|---------|---------|
+|----|----|----|----|----|----|----|----|
 | `100` | `1650` | `8200` | `0.71` | `0.64` | `3` | `9.8` | `((...))` |
 
 | Income    | Rent    |
@@ -64,13 +64,13 @@ ggplot(methods, aes(x = flexibility, y = y)) +
 
 In **parametric** models, you assume there is a linear relationship between predictors. In **non-parametric** models, the model grows as you feed it more data. It can be a more "wiggly" line. Because of this, it's harder to "look inside" the model via traditional regression outputs.
 
-## Evaluating a Model 
+## Evaluating a Model
 
 In traditional statistics, we look at the $R^2$ to evaluate a simple/multiple regression. For example, if $R^2=0.3$, we can say that 30% of the variance in the points can be explained by the model.
 
 In prediction, what we really want to know is how well a model can predict things we have never seen before.
 
-### In traditional statistical inference... 
+### In traditional statistical inference...
 
 The gaps between the observed and predicted values are known as residuals. The method for optimizing the line in a linear regression model is known as **Least Squares Regression**, as we are minimizing the sum of squared errors $\text{SSE}$.
 
@@ -150,7 +150,7 @@ ggplot(df, aes(x = fold, y = iteration, fill = role)) +
   )
 ```
 
-### Overfitting 
+### Overfitting
 
 Let's say you come up with a model that's so good at predicting. The problem with overfitting is that it learns the noise so well that it is amazing at predicting seen data, but not at predicting unseen data.
 
