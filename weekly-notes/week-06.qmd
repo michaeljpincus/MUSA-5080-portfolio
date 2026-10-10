@@ -364,6 +364,7 @@ Did it help or hurt? Binning helps when the relationship is really jumpy. It hur
 ### When the slope depends on the group 
 
 ```{r}
+#| echo: false
 ggplot(tracts, aes(log(income), rent, color=ring)) + 
   geom_point(alpha=0.3) + geom_smooth(method='lm', se=FALSE) + 
   theme_minimal(base_family='jakarta') + labs(color='Ring', x='log(Income)', y='Rent')
@@ -480,6 +481,7 @@ fe_coefs <- tibble(term=names(coef(m_fe)), est=coef(m_fe)) |>
 ```
 
 ```{r}
+#| echo: false 
 ggplot(fe_coefs, aes(est, reorder(term,est))) + 
   geom_col() + 
   labs(x=paste('Rent difference vs.', levels(tracts$district)[1], '(the reference)'),
@@ -498,6 +500,7 @@ tracts <- tracts |>
 ```
 
 ```{r}
+#| echo: false 
 map_resid <- function(var, title) {
   ggplot(tracts) + 
     geom_sf(aes(fill=.data[[var]]), color=NA) + 
@@ -556,10 +559,10 @@ If a group is too small:
 ### What the log says 
 
 ```{r}
+#| echo: false 
 ggplot(model_log, aes(cv_rmse, fct_inorder(paste(model, added)))) +
   geom_point(size = 3, aes(color = cv_rmse)) +
   labs(x = 'CV RMSE ($)', y = NULL, color = 'CV RMSE ($)') +
-  scale_color_distiller(palette = 'YlOrRd', direction = -1, guide = guide_colorbar(reverse = TRUE)) +
   theme_minimal(base_family = 'jakarta')
 ```
 
