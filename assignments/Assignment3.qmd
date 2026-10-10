@@ -27,6 +27,9 @@ To adjust for inflation between 2019 and 2024, the `estimate` and margin of erro
 library(tidyverse)
 library(tidycensus)
 library(sf)
+library(showtext)
+font_add_google("Plus Jakarta Sans", "jakarta")
+showtext_auto()
 
 infl_2024 <- c(`2019` = 1.231, `2024` = 1.000)
 
@@ -97,7 +100,7 @@ inc_tested %>%
     name   = "Change"
   ) +
   coord_flip() +
-  theme_minimal() +
+  theme_minimal(base_family = "jakarta") +
   labs(title = "Statistically significant change in median household income",
        subtitle = "2015–2019 vs 2020–2024, ACS 5-year estimates",
        x = NULL, y = "Change in median household income")
@@ -136,6 +139,7 @@ ggplot(ny) +
     box.padding = 0.4,
     point.padding = 0.4,
     fontface = 'bold',
+    family = "jakarta",
     force = 3,
     max.overlaps = Inf,
     segment.color = "grey30"
@@ -152,7 +156,7 @@ ggplot(ny) +
     subtitle = "2015–2019 vs 2020–2024, ACS 5-year estimates",
     fill = 'Change in Median Household Income'
   ) +
-theme_void()
+theme_void(base_family = "jakarta")
 ```
 
 ## Reliability of ACY 5YE Data

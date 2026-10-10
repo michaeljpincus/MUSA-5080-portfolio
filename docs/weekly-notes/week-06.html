@@ -1,0 +1,2102 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="dcterms.date" content="2026-10-09">
+<meta name="description" content="Working with different kinds of models.">
+
+<title>Week 6: Feature Engineering – Michael Pincus - MUSA 5080 Portfolio</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-445b8638c3d06994fee0907d791121c4.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+
+<body class="nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">PPA Portfolio</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../about.html"> 
+<span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../weekly-notes/index.html"> 
+<span class="menu-text">Weekly Notes</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../assignments/index.html"> 
+<span class="menu-text">Assignments</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/michaeljpincus/MUSA-5080-portfolio"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#feature-engineering" id="toc-feature-engineering" class="nav-link active" data-scroll-target="#feature-engineering">Feature Engineering</a>
+  <ul class="collapse">
+  <li><a href="#setup-the-same-tracts-as-week-5" id="toc-setup-the-same-tracts-as-week-5" class="nav-link" data-scroll-target="#setup-the-same-tracts-as-week-5">Setup: the same tracts as Week 5</a></li>
+  <li><a href="#build-the-predictors-once-then-drop-missing-rows-once" id="toc-build-the-predictors-once-then-drop-missing-rows-once" class="nav-link" data-scroll-target="#build-the-predictors-once-then-drop-missing-rows-once">Build the predictors once, then drop missing rows once</a></li>
+  <li><a href="#a-textcv-helper-with-fixed-folds" id="toc-a-textcv-helper-with-fixed-folds" class="nav-link" data-scroll-target="#a-textcv-helper-with-fixed-folds">A <span class="math inline">\(\text{CV}\)</span> helper with fixed folds</a></li>
+  <li><a href="#baseline-and-the-model-log-record" id="toc-baseline-and-the-model-log-record" class="nav-link" data-scroll-target="#baseline-and-the-model-log-record">Baseline, and the model log (record)</a></li>
+  </ul></li>
+  <li><a href="#part-1-textlog-transformations" id="toc-part-1-textlog-transformations" class="nav-link" data-scroll-target="#part-1-textlog-transformations">Part 1: <span class="math inline">\(\text{log}\)</span> transformations</a>
+  <ul class="collapse">
+  <li><a href="#why-textlog-skew." id="toc-why-textlog-skew." class="nav-link" data-scroll-target="#why-textlog-skew.">Why <span class="math inline">\(\text{log}\)</span>? Skew.</a></li>
+  <li><a href="#textlog-a-predictor" id="toc-textlog-a-predictor" class="nav-link" data-scroll-target="#textlog-a-predictor"><span class="math inline">\(\text{log}\)</span> a predictor</a></li>
+  <li><a href="#the-zero-problem" id="toc-the-zero-problem" class="nav-link" data-scroll-target="#the-zero-problem">The zero problem</a></li>
+  <li><a href="#textlog-the-outcome" id="toc-textlog-the-outcome" class="nav-link" data-scroll-target="#textlog-the-outcome"><span class="math inline">\(\text{log}\)</span> the outcome</a></li>
+  <li><a href="#the-four-combinations" id="toc-the-four-combinations" class="nav-link" data-scroll-target="#the-four-combinations">The four combinations</a></li>
+  <li><a href="#the-trap-your-model-stops-making-sense" id="toc-the-trap-your-model-stops-making-sense" class="nav-link" data-scroll-target="#the-trap-your-model-stops-making-sense">The trap: your model stops making sense!</a></li>
+  </ul></li>
+  <li><a href="#part-2-squared-terms" id="toc-part-2-squared-terms" class="nav-link" data-scroll-target="#part-2-squared-terms">Part 2: Squared terms</a>
+  <ul class="collapse">
+  <li><a href="#when-the-scatterplot-bends" id="toc-when-the-scatterplot-bends" class="nav-link" data-scroll-target="#when-the-scatterplot-bends">When the scatterplot bends</a></li>
+  <li><a href="#add-a-squared-term" id="toc-add-a-squared-term" class="nav-link" data-scroll-target="#add-a-squared-term">Add a squared term</a></li>
+  <li><a href="#where-does-it-turn" id="toc-where-does-it-turn" class="nav-link" data-scroll-target="#where-does-it-turn">Where does it turn?</a></li>
+  </ul></li>
+  <li><a href="#part-3-categorical-variables" id="toc-part-3-categorical-variables" class="nav-link" data-scroll-target="#part-3-categorical-variables">Part 3: Categorical variables</a>
+  <ul class="collapse">
+  <li><a href="#two-reasons-to-use-categories" id="toc-two-reasons-to-use-categories" class="nav-link" data-scroll-target="#two-reasons-to-use-categories">Two reasons to use categories</a></li>
+  <li><a href="#case_when" id="toc-case_when" class="nav-link" data-scroll-target="#case_when"><code>case_when()</code></a></li>
+  <li><a href="#cut-for-evenly-spaced-bins" id="toc-cut-for-evenly-spaced-bins" class="nav-link" data-scroll-target="#cut-for-evenly-spaced-bins"><code>cut()</code> for evenly spaced bins</a></li>
+  <li><a href="#what-r-does-behind-the-scenes" id="toc-what-r-does-behind-the-scenes" class="nav-link" data-scroll-target="#what-r-does-behind-the-scenes">What R does behind the scenes</a></li>
+  <li><a href="#reading-the-coefficients" id="toc-reading-the-coefficients" class="nav-link" data-scroll-target="#reading-the-coefficients">Reading the coefficients</a></li>
+  <li><a href="#change-the-reference" id="toc-change-the-reference" class="nav-link" data-scroll-target="#change-the-reference">Change the reference</a></li>
+  <li><a href="#the-trade-you-threw-information-away" id="toc-the-trade-you-threw-information-away" class="nav-link" data-scroll-target="#the-trade-you-threw-information-away">The trade: you threw information away</a></li>
+  </ul></li>
+  <li><a href="#part-4-interactions" id="toc-part-4-interactions" class="nav-link" data-scroll-target="#part-4-interactions">Part 4: Interactions</a>
+  <ul class="collapse">
+  <li><a href="#when-the-slope-depends-on-the-group" id="toc-when-the-slope-depends-on-the-group" class="nav-link" data-scroll-target="#when-the-slope-depends-on-the-group">When the slope depends on the group</a></li>
+  <li><a href="#fit-and-read-it" id="toc-fit-and-read-it" class="nav-link" data-scroll-target="#fit-and-read-it">Fit and read it</a></li>
+  </ul></li>
+  <li><a href="#part-5-fixed-effects" id="toc-part-5-fixed-effects" class="nav-link" data-scroll-target="#part-5-fixed-effects">Part 5: Fixed effects</a>
+  <ul class="collapse">
+  <li><a href="#a-categorical-variable-for-place" id="toc-a-categorical-variable-for-place" class="nav-link" data-scroll-target="#a-categorical-variable-for-place">A categorical variable for <em>place</em></a></li>
+  <li><a href="#assign-each-tract-to-a-district" id="toc-assign-each-tract-to-a-district" class="nav-link" data-scroll-target="#assign-each-tract-to-a-district">Assign each tract to a district</a></li>
+  <li><a href="#numbers-that-are-really-labels" id="toc-numbers-that-are-really-labels" class="nav-link" data-scroll-target="#numbers-that-are-really-labels">Numbers that are really labels</a></li>
+  <li><a href="#add-the-fixed-effect" id="toc-add-the-fixed-effect" class="nav-link" data-scroll-target="#add-the-fixed-effect">Add the fixed effect</a></li>
+  <li><a href="#each-districts-intercept" id="toc-each-districts-intercept" class="nav-link" data-scroll-target="#each-districts-intercept">Each district’s intercept</a></li>
+  <li><a href="#did-it-absorb-the-clusters" id="toc-did-it-absorb-the-clusters" class="nav-link" data-scroll-target="#did-it-absorb-the-clusters">Did it absorb the clusters?</a></li>
+  <li><a href="#into-the-model-log" id="toc-into-the-model-log" class="nav-link" data-scroll-target="#into-the-model-log">Into the model log</a></li>
+  <li><a href="#check-group-sizes-first-every-time" id="toc-check-group-sizes-first-every-time" class="nav-link" data-scroll-target="#check-group-sizes-first-every-time">Check group sizes first, every time</a></li>
+  </ul></li>
+  <li><a href="#putting-it-all-together" id="toc-putting-it-all-together" class="nav-link" data-scroll-target="#putting-it-all-together">6. Putting it all together</a>
+  <ul class="collapse">
+  <li><a href="#what-the-log-says" id="toc-what-the-log-says" class="nav-link" data-scroll-target="#what-the-log-says">What the log says</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title">Week 6: Feature Engineering</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i> Code</button></div></div>
+</div>
+
+<div>
+  <div class="description">
+    Working with different kinds of models.
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">October 9, 2026</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="feature-engineering" class="level2">
+<h2 data-anchor-id="feature-engineering">Feature Engineering</h2>
+<p>A linear model can only draw straight lines through whatever you give it. Feature engineering is deciding what you give it.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 22%">
+<col style="width: 34%">
+<col style="width: 43%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>Happens to <span class="math inline">\(\hat{y}\)</span> (prediction)</th>
+<th>Happens to <span class="math inline">\(\hat{\beta}\)</span> (reading coefficients)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Logs</td>
+<td>Better fit on skewed data</td>
+<td>Read in percentages, not units</td>
+</tr>
+<tr class="even">
+<td>Squared terms</td>
+<td>Line can bend</td>
+<td>No single coefficient means anything alone</td>
+</tr>
+<tr class="odd">
+<td>Categories</td>
+<td>Captures jumps and non-smooth patterns</td>
+<td>Every coefficient is a comparison to a reference group</td>
+</tr>
+<tr class="even">
+<td>Interactions</td>
+<td>Slopes can differ by group</td>
+<td>Effect depends on which group you’re in</td>
+</tr>
+<tr class="odd">
+<td>Fixed effects</td>
+<td>Absorbs everything about a place you didn’t measure</td>
+<td>Tells you <em>where</em>, never <em>why</em></td>
+</tr>
+</tbody>
+</table>
+<p>We judge these by <span class="math inline">\(\text{CV RMSE}\)</span>, not by <span class="math inline">\(p\)</span>-values.</p>
+<section id="setup-the-same-tracts-as-week-5" class="level3">
+<h3 data-anchor-id="setup-the-same-tracts-as-week-5">Setup: the same tracts as Week 5</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidycensus) </span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sf)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(patchwork)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">tigris_use_cache =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(showtext)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">font_add_google</span>(<span class="st">"Plus Jakarta Sans"</span>, <span class="st">"jakarta"</span>)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">showtext_auto</span>()</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="fu">census_api_key</span>(<span class="fu">Sys.getenv</span>(<span class="st">'CENSUS_API_KEY'</span>))</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>tracts_raw <span class="ot">&lt;-</span> <span class="fu">get_acs</span>(</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">geography =</span> <span class="st">'tract'</span>, <span class="at">state =</span> <span class="st">'PA'</span>, <span class="at">county =</span> <span class="st">'Philadelphia'</span>,</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">variables =</span> <span class="fu">c</span>(</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">rent =</span> <span class="st">'B25064_001'</span>,</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">income =</span> <span class="st">'B19013_001'</span>,</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">pop =</span> <span class="st">'B01003_001'</span>,</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">yr_built =</span> <span class="st">'B25035_001'</span>,</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">hh_total =</span> <span class="st">'B25003_001'</span>,</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    <span class="at">hh_renter =</span> <span class="st">'B25003_003'</span>),</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>   <span class="at">year =</span> <span class="dv">2023</span>, <span class="at">survey =</span> <span class="st">'acs5'</span>, <span class="at">output =</span> <span class="st">'wide'</span>, <span class="at">geometry =</span> <span class="cn">TRUE</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>  )<span class="sc">|&gt;</span> </span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    <span class="fu">st_transform</span>(<span class="dv">2272</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="build-the-predictors-once-then-drop-missing-rows-once" class="level3">
+<h3 data-anchor-id="build-the-predictors-once-then-drop-missing-rows-once">Build the predictors once, then drop missing rows once</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>city_hall <span class="ot">&lt;-</span> <span class="fu">st_sfc</span>(<span class="fu">st_point</span>(<span class="fu">c</span>(<span class="sc">-</span><span class="fl">75.1636</span>, <span class="fl">39.9526</span>)), <span class="at">crs=</span><span class="dv">4326</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_transform</span>(<span class="dv">2272</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>tracts <span class="ot">&lt;-</span> tracts_raw <span class="sc">|&gt;</span> </span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">rent =</span> rentE,</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">rent_moe =</span> rentM, </span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">income =</span> incomeE,</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">bldg_age =</span> <span class="dv">2023</span> <span class="sc">-</span> yr_builtE,</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">pct_renter =</span> <span class="dv">100</span> <span class="sc">*</span> hh_renterE <span class="sc">/</span> hh_totalE,</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">dist_ch_mi =</span> <span class="fu">as.numeric</span>(<span class="fu">st_distance</span>(geometry, city_hall)) <span class="sc">/</span> <span class="dv">5280</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(GEOID, rent, rent_moe, income, bldg_age, pct_renter, dist_ch_mi) <span class="sc">|&gt;</span> </span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(rent), <span class="sc">!</span><span class="fu">is.na</span>(income), <span class="sc">!</span><span class="fu">is.na</span>(bldg_age), <span class="sc">!</span><span class="fu">is.na</span>(pct_renter))</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="fu">nrow</span>(tracts)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 377</code></pre>
+</div>
+</div>
+<p>Every model today uses <strong>these same rows</strong>. If one model quietly drops tracts, its <span class="math inline">\(\text{RMSE}\)</span> isn’t comparable.</p>
+</section>
+<section id="a-textcv-helper-with-fixed-folds" class="level3">
+<h3 data-anchor-id="a-textcv-helper-with-fixed-folds">A <span class="math inline">\(\text{CV}\)</span> helper with fixed folds</h3>
+<p>Same idea as <code>cv_rmse()</code> in your template. Same folds for every model, so differences come from the features, not luck.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">5080</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>folds <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="fu">rep</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>, <span class="at">length.out =</span> <span class="fu">nrow</span>(tracts)))</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Function that calculates cv rmse through k-fold validation: </span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>cv_rmse <span class="ot">&lt;-</span> <span class="cf">function</span>(f, data, <span class="at">log_outcome =</span> <span class="cn">FALSE</span>) {</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  preds <span class="ot">&lt;-</span> <span class="fu">numeric</span>(<span class="fu">nrow</span>(data))</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (k <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>) {</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    m <span class="ot">&lt;-</span> <span class="fu">lm</span>(f, data[folds <span class="sc">!=</span> k, ])</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    p <span class="ot">&lt;-</span> <span class="fu">predict</span>(m, <span class="at">newdata =</span> data[folds<span class="sc">==</span>k, ])</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (log_outcome) p <span class="ot">&lt;-</span> <span class="fu">exp</span>(p)</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    preds[folds <span class="sc">==</span> k] <span class="ot">&lt;-</span> p</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sqrt</span>(<span class="fu">mean</span>((data<span class="sc">$</span>rent <span class="sc">-</span> preds)<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="baseline-and-the-model-log-record" class="level3">
+<h3 data-anchor-id="baseline-and-the-model-log-record">Baseline, and the model log (record)</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>f0 <span class="ot">&lt;-</span> rent <span class="sc">~</span> income <span class="sc">+</span> pct_renter <span class="sc">+</span> bldg_age <span class="sc">+</span> dist_ch_mi</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>m0 <span class="ot">&lt;-</span> <span class="fu">lm</span>(f0, <span class="at">data =</span> tracts)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>model_log <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">model =</span> <span class="st">'m0'</span>, <span class="at">added =</span> <span class="st">'baseline'</span>,</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>                    <span class="at">cv_rmse =</span> <span class="fu">cv_rmse</span>(f0, tracts))</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>model_log</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 3
+  model added    cv_rmse
+  &lt;chr&gt; &lt;chr&gt;      &lt;dbl&gt;
+1 m0    baseline    265.</code></pre>
+</div>
+</div>
+<p>In this model, we can predict the rent within about $265.</p>
+<p>Every section ends the same way: <strong>fit it, cross-validate it on the same folds, add a row.</strong></p>
+</section>
+</section>
+<section id="part-1-textlog-transformations" class="level2">
+<h2 data-anchor-id="part-1-textlog-transformations">Part 1: <span class="math inline">\(\text{log}\)</span> transformations</h2>
+<section id="why-textlog-skew." class="level3">
+<h3 data-anchor-id="why-textlog-skew.">Why <span class="math inline">\(\text{log}\)</span>? Skew.</h3>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="week-06_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Long right tail: a few very rich tracts pull the line around. A log pulls the tail in, so equal percentage differences become equal differences.</p>
+</section>
+<section id="textlog-a-predictor" class="level3">
+<h3 data-anchor-id="textlog-a-predictor"><span class="math inline">\(\text{log}\)</span> a predictor</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>f_logx <span class="ot">&lt;-</span> rent <span class="sc">~</span> <span class="fu">log</span>(income) <span class="sc">+</span> pct_renter <span class="sc">+</span> bldg_age <span class="sc">+</span> dist_ch_mi</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>m_logx <span class="ot">&lt;-</span> <span class="fu">lm</span>(f_logx, <span class="at">data=</span>tracts) </span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">coef</span>(m_logx)[<span class="st">'log(income)'</span>]</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>b</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>log(income) 
+   502.1787 </code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>b <span class="sc">/</span> <span class="dv">100</span> <span class="co"># rent change for a 1% increase in income </span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>log(income) 
+   5.021787 </code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>b <span class="sc">*</span> <span class="fu">log</span>(<span class="fl">1.10</span>) <span class="co"># rent change for a 10% increase in income (exact)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>log(income) 
+   47.86274 </code></pre>
+</div>
+</div>
+<p><strong>Reading it</strong>: a <strong>1% increase</strong> in income goes with about <span class="math inline">\(\beta\)</span>/100 dollars more rent, holding the other variables constant.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>model_log <span class="ot">&lt;-</span> model_log <span class="sc">|&gt;</span> </span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_row</span>(<span class="at">model =</span> <span class="st">'m1'</span>, <span class="at">added=</span><span class="st">'log(income)'</span>, <span class="at">cv_rmse=</span><span class="fu">cv_rmse</span>(f_logx, tracts))</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>model_log</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 2 × 3
+  model added       cv_rmse
+  &lt;chr&gt; &lt;chr&gt;         &lt;dbl&gt;
+1 m0    baseline       265.
+2 m1    log(income)    265.</code></pre>
+</div>
+</div>
+<p>Didn’t really do much…</p>
+</section>
+<section id="the-zero-problem" class="level3">
+<h3 data-anchor-id="the-zero-problem">The zero problem</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">log</span>(<span class="dv">0</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] -Inf</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">log1p</span>(<span class="dv">0</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">log1p</span>(<span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">10</span>, <span class="dv">100</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.0000000 0.6931472 2.3978953 4.6151205</code></pre>
+</div>
+</div>
+<p>Your <strong>counts</strong> from the open data portal (crimes, trees, 311 calls) will have zeroes. <code>log(0)</code> is <code>-Inf</code> and <code>lm()</code> will fail or silently misbehave.</p>
+<p>Use <code>log1p(x)</code> for anything that can be zero. The percentage reading becomes approximate for small values, which is fine.</p>
+</section>
+<section id="textlog-the-outcome" class="level3">
+<h3 data-anchor-id="textlog-the-outcome"><span class="math inline">\(\text{log}\)</span> the outcome</h3>
+<p>Rent is skewed too:</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="week-06_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Based on this, we can log <span class="math inline">\(y\)</span> instead of (or as well as) <span class="math inline">\(x\)</span>.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>f_logy <span class="ot">&lt;-</span> <span class="fu">log</span>(rent) <span class="sc">~</span> <span class="fu">log</span>(income) <span class="sc">+</span> pct_renter <span class="sc">+</span> bldg_age <span class="sc">+</span> dist_ch_mi</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>m_logy <span class="ot">&lt;-</span> <span class="fu">lm</span>(f_logy, <span class="at">data=</span>tracts)</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(m_logy)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  (Intercept)   log(income)    pct_renter      bldg_age    dist_ch_mi 
+ 3.5205043462  0.3633422828  0.0005273753 -0.0035283414 -0.0200274106 </code></pre>
+</div>
+</div>
+<p><strong>Interpretation</strong>:</p>
+<p><code>pct_renter</code>: a 1-unit increase in <span class="math inline">\(x\)</span> goes with about a <span class="math inline">\(100 * \beta\)</span> % change in rent</p>
+<p><code>log_income</code>: <span class="math inline">\(\text{log-log}\)</span>, so a 1% increase in income goes with about a <span class="math inline">\(\beta\)</span>% change in rent (an elasticity)</p>
+</section>
+<section id="the-four-combinations" class="level3">
+<h3 data-anchor-id="the-four-combinations">The four combinations</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 36%">
+<col style="width: 26%">
+<col style="width: 36%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Model</th>
+<th>Formula</th>
+<th>A coefficient <span class="math inline">\(\beta\)</span> means…</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>level-level</td>
+<td><code>y ~ x</code></td>
+<td>+1 unit of <span class="math inline">\(x\)</span> is + <span class="math inline">\(\beta\)</span> units of <span class="math inline">\(y\)</span></td>
+</tr>
+<tr class="even">
+<td>level-<span class="math inline">\(\text{log}\)</span></td>
+<td><code>y ~ log(x)</code></td>
+<td>+1% of <span class="math inline">\(x\)</span> is + <span class="math inline">\(\beta/100\)</span> units of <span class="math inline">\(y\)</span></td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\text{log}\)</span>-level</td>
+<td><code>log(y) ~ x</code></td>
+<td>+1 unit of <span class="math inline">\(x\)</span> is <span class="math inline">\(\approx 100 * \beta\)</span> % change in <span class="math inline">\(y\)</span></td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\text{log-log}\)</span></td>
+<td><code>log(y) ~ log(x)</code></td>
+<td>+1% of <span class="math inline">\(x\)</span> is <span class="math inline">\(\approx\beta\)</span> % change in <span class="math inline">\(y\)</span></td>
+</tr>
+</tbody>
+</table>
+<p>The <span class="math inline">\(\approx\)</span> gets worse as <span class="math inline">\(\beta\)</span> gets large.</p>
+</section>
+<section id="the-trap-your-model-stops-making-sense" class="level3">
+<h3 data-anchor-id="the-trap-your-model-stops-making-sense">The trap: your model stops making sense!</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sqrt</span>(<span class="fu">mean</span>(<span class="fu">residuals</span>(m_logy)<span class="sc">^</span><span class="dv">2</span>)) <span class="co"># looks amazing! </span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.1885153</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sqrt</span>(<span class="fu">mean</span>(<span class="fu">residuals</span>(m0)<span class="sc">^</span><span class="dv">2</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 259.5507</code></pre>
+</div>
+</div>
+<p>The first number is in <span class="math inline">\(\text{log}\)</span>-dollars. The second is in dollars. Comparing them is meaningless.</p>
+<p><strong>Fix:</strong> predict, then <code>exp()</code> back to dollars before computing <span class="math inline">\(\text{RMSE}\)</span>.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>model_log <span class="ot">&lt;-</span> model_log <span class="sc">|&gt;</span> </span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_row</span>(<span class="at">model=</span><span class="st">'m2'</span>, <span class="at">added=</span><span class="st">'log(rent) + log(income)'</span>,</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>          <span class="at">cv_rmse =</span> <span class="fu">cv_rmse</span>(f_logy, tracts, <span class="at">log_outcome=</span><span class="cn">TRUE</span>))</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>model_log</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 3 × 3
+  model added                   cv_rmse
+  &lt;chr&gt; &lt;chr&gt;                     &lt;dbl&gt;
+1 m0    baseline                   265.
+2 m1    log(income)                265.
+3 m2    log(rent) + log(income)    263.</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="part-2-squared-terms" class="level2">
+<h2 data-anchor-id="part-2-squared-terms">Part 2: Squared terms</h2>
+<section id="when-the-scatterplot-bends" class="level3">
+<h3 data-anchor-id="when-the-scatterplot-bends">When the scatterplot bends</h3>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="week-06_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>If the flexible curve and the straight line disagree, a straight line is leaving information on the table.</p>
+<p>Look at the pile-up on the right. The census codes everything built before 1940 as ‘1939 or earlier’, so the building age tops out. That’s the data, not a pattern. Check your own variables for walls like this.</p>
+</section>
+<section id="add-a-squared-term" class="level3">
+<h3 data-anchor-id="add-a-squared-term">Add a squared term</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>f_sq <span class="ot">&lt;-</span> rent <span class="sc">~</span> <span class="fu">log</span>(income) <span class="sc">+</span> pct_renter <span class="sc">+</span> bldg_age <span class="sc">+</span> <span class="fu">I</span>(bldg_age<span class="sc">^</span><span class="dv">2</span>) <span class="sc">+</span> dist_ch_mi</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>m_sq <span class="ot">&lt;-</span> <span class="fu">lm</span>(f_sq, <span class="at">data=</span>tracts) </span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(m_sq)[<span class="fu">c</span>(<span class="st">'bldg_age'</span>, <span class="st">'I(bldg_age^2)'</span>)]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>     bldg_age I(bldg_age^2) 
+  -28.0044512     0.1823244 </code></pre>
+</div>
+</div>
+<p><code>I()</code> means ‘do the math’. Without it, R reads <code>^</code> as formula syntax and will ignore what you want.</p>
+<p><strong>Reading it</strong>: you can’t read either coefficient alone. The effect of age depends on the age.</p>
+<ul>
+<li><p>Linear + squared - -&gt; rises, then levels off or falls</p></li>
+<li><p>Linear - squared + -&gt; falls, then levels off or rises</p></li>
+</ul>
+</section>
+<section id="where-does-it-turn" class="level3">
+<h3 data-anchor-id="where-does-it-turn">Where does it turn?</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>b1 <span class="ot">&lt;-</span> <span class="fu">coef</span>(m_sq)[<span class="st">'bldg_age'</span>]</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>b2 <span class="ot">&lt;-</span> <span class="fu">coef</span>(m_sq)[<span class="st">'I(bldg_age^2)'</span>]</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a><span class="sc">-</span>b1 <span class="sc">/</span> (<span class="dv">2</span> <span class="sc">*</span> b2) <span class="co"># The turning point</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>bldg_age 
+76.79841 </code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">range</span>(tracts<span class="sc">$</span>bldg_age)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1]  5 85</code></pre>
+</div>
+</div>
+<p>It’s within the range!</p>
+<p>If the turning point is outside your data, the curve is just bending, not turning. Don’t tell a story about a turn you never observed.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>model_log <span class="ot">&lt;-</span> model_log <span class="sc">|&gt;</span> </span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_row</span>(<span class="at">model=</span><span class="st">'m3'</span>, <span class="at">added =</span> <span class="st">'+ bldg_age^2'</span>, <span class="at">cv_rmse=</span><span class="fu">cv_rmse</span>(f_sq, tracts))</span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>model_log</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 4 × 3
+  model added                   cv_rmse
+  &lt;chr&gt; &lt;chr&gt;                     &lt;dbl&gt;
+1 m0    baseline                   265.
+2 m1    log(income)                265.
+3 m2    log(rent) + log(income)    263.
+4 m3    + bldg_age^2               261.</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="part-3-categorical-variables" class="level2">
+<h2 data-anchor-id="part-3-categorical-variables">Part 3: Categorical variables</h2>
+<section id="two-reasons-to-use-categories" class="level3">
+<h3 data-anchor-id="two-reasons-to-use-categories">Two reasons to use categories</h3>
+<ol type="1">
+<li><strong>The variable already is one</strong>: zoning class, planning district, housing type</li>
+<li><strong>A number behaves like groups:</strong> the relationship jumps instead of sloping smoothly</li>
+</ol>
+<p>Make them with <code>case_when()</code> or <code>cut()</code>, then make sure R treats them as a factor.</p>
+</section>
+<section id="case_when" class="level3">
+<h3 data-anchor-id="case_when"><code>case_when()</code></h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>tracts <span class="ot">&lt;-</span> tracts <span class="sc">|&gt;</span> </span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">ring =</span> <span class="fu">case_when</span>(</span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>      dist_ch_mi <span class="sc">&lt;</span> <span class="dv">2</span> <span class="sc">~</span> <span class="st">'Core'</span>,</span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>      dist_ch_mi <span class="sc">&lt;</span> <span class="dv">5</span> <span class="sc">~</span> <span class="st">'Inner'</span>, </span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>      <span class="cn">TRUE</span>           <span class="sc">~</span> <span class="st">'Outer'</span></span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">ring =</span> <span class="fu">factor</span>(ring, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">'Core'</span>, <span class="st">'Inner'</span>, <span class="st">'Outer'</span>))</span>
+<span id="cb37-9"><a href="#cb37-9" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb37-10"><a href="#cb37-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-11"><a href="#cb37-11" aria-hidden="true" tabindex="-1"></a>tracts <span class="sc">|&gt;</span> <span class="fu">st_drop_geometry</span>() <span class="sc">|&gt;</span> <span class="fu">count</span>(ring)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   ring   n
+1  Core  94
+2 Inner 133
+3 Outer 150</code></pre>
+</div>
+</div>
+</section>
+<section id="cut-for-evenly-spaced-bins" class="level3">
+<h3 data-anchor-id="cut-for-evenly-spaced-bins"><code>cut()</code> for evenly spaced bins</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>tracts <span class="ot">&lt;-</span> tracts <span class="sc">|&gt;</span> </span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">renter_band =</span> <span class="fu">cut</span>(pct_renter, </span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>                           <span class="at">breaks=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">33</span>,<span class="dv">66</span>,<span class="dv">100</span>),</span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>                           <span class="at">labels=</span><span class="fu">c</span>(<span class="st">'Mostly Owners'</span>, <span class="st">'Mixed'</span>, <span class="st">'Mostly Renters'</span>),</span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>                            <span class="at">include.lowest=</span><span class="cn">TRUE</span>))</span>
+<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a>tracts <span class="sc">|&gt;</span> <span class="fu">st_drop_geometry</span>() <span class="sc">|&gt;</span> <span class="fu">count</span>(renter_band)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>     renter_band   n
+1  Mostly Owners  88
+2          Mixed 210
+3 Mostly Renters  79</code></pre>
+</div>
+</div>
+</section>
+<section id="what-r-does-behind-the-scenes" class="level3">
+<h3 data-anchor-id="what-r-does-behind-the-scenes">What R does behind the scenes</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">model.matrix</span>(<span class="sc">~</span> ring, <span class="at">data=</span><span class="fu">st_drop_geometry</span>(tracts)) <span class="sc">|&gt;</span> <span class="fu">head</span>(<span class="dv">8</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  (Intercept) ringInner ringOuter
+1           1         0         0
+2           1         0         0
+3           1         0         0
+4           1         0         0
+5           1         1         0
+6           1         1         0
+7           1         1         0
+8           1         1         0</code></pre>
+</div>
+</div>
+<p>A factor with <span class="math inline">\(k\)</span> categories becomes <span class="math inline">\(k-1\)</span> dummy variables (0/1) columns. The one left out, <strong>Core</strong>, is the <strong>reference level</strong>. It’s absorbed into the intercept.</p>
+<p>You never make the dummies yourself. You also never include all <span class="math inline">\(k\)</span>. That’s what the reference level prevents.</p>
+</section>
+<section id="reading-the-coefficients" class="level3">
+<h3 data-anchor-id="reading-the-coefficients">Reading the coefficients</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>f_cat <span class="ot">&lt;-</span> rent <span class="sc">~</span> <span class="fu">log</span>(income) <span class="sc">+</span> pct_renter <span class="sc">+</span> bldg_age <span class="sc">+</span> <span class="fu">I</span>(bldg_age<span class="sc">^</span><span class="dv">2</span>) <span class="sc">+</span> ring</span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>m_cat <span class="ot">&lt;-</span> <span class="fu">lm</span>(f_cat, <span class="at">data=</span>tracts) </span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(m_cat)[<span class="fu">c</span>(<span class="st">'ringInner'</span>, <span class="st">'ringOuter'</span>)]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>ringInner ringOuter 
+-122.2774 -164.1935 </code></pre>
+</div>
+</div>
+<p>Every category coefficient is a comparison to the reference. `</p>
+<p><code>ringOuter</code> is how much higher or lower predicted rent in outer tracts compared to core tracts, holding all other variables constant.</p>
+</section>
+<section id="change-the-reference" class="level3">
+<h3 data-anchor-id="change-the-reference">Change the reference</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>tracts_r <span class="ot">&lt;-</span> tracts <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">ring=</span><span class="fu">relevel</span>(ring, <span class="at">ref=</span><span class="st">'Outer'</span>)) </span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(<span class="fu">lm</span>(f_cat, <span class="at">data=</span>tracts_r))[<span class="fu">c</span>(<span class="st">'ringCore'</span>, <span class="st">'ringInner'</span>)]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> ringCore ringInner 
+164.19351  41.91608 </code></pre>
+</div>
+</div>
+<p>Predictions don’t change at all. Only the comparison changes. Pick the reference that makes the sentence you want to write the easiest. Often that’s the largest group or a natural baseline.</p>
+</section>
+<section id="the-trade-you-threw-information-away" class="level3">
+<h3 data-anchor-id="the-trade-you-threw-information-away">The trade: you threw information away</h3>
+<p>We replaced <code>dist_ch_mi</code> (a number) with <code>ring</code> (three groups). Two tracts at 2.1 and 4.9 miles are now identical, according to the model.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>model_log <span class="ot">&lt;-</span> model_log <span class="sc">|&gt;</span> </span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_row</span>(<span class="at">model =</span> <span class="st">'m4'</span>, <span class="at">added=</span><span class="st">'ring instead of dist_ch_mi'</span>,</span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>          <span class="at">cv_rmse =</span> <span class="fu">cv_rmse</span>(f_cat, tracts))</span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>model_log</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 5 × 3
+  model added                      cv_rmse
+  &lt;chr&gt; &lt;chr&gt;                        &lt;dbl&gt;
+1 m0    baseline                      265.
+2 m1    log(income)                   265.
+3 m2    log(rent) + log(income)       263.
+4 m3    + bldg_age^2                  261.
+5 m4    ring instead of dist_ch_mi    265.</code></pre>
+</div>
+</div>
+<p>Did it help or hurt? Binning helps when the relationship is really jumpy. It hurts when it’s smooth. <strong>The model log tells us which</strong>.</p>
+</section>
+</section>
+<section id="part-4-interactions" class="level2">
+<h2 data-anchor-id="part-4-interactions">Part 4: Interactions</h2>
+<section id="when-the-slope-depends-on-the-group" class="level3">
+<h3 data-anchor-id="when-the-slope-depends-on-the-group">When the slope depends on the group</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(tracts, <span class="fu">aes</span>(<span class="fu">log</span>(income), rent, <span class="at">color=</span>ring)) <span class="sc">+</span> </span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha=</span><span class="fl">0.3</span>) <span class="sc">+</span> <span class="fu">geom_smooth</span>(<span class="at">method=</span><span class="st">'lm'</span>, <span class="at">se=</span><span class="cn">FALSE</span>) <span class="sc">+</span> </span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_family=</span><span class="st">'jakarta'</span>) <span class="sc">+</span> <span class="fu">labs</span>(<span class="at">color=</span><span class="st">'Ring'</span>, <span class="at">x=</span><span class="st">'log(Income)'</span>, <span class="at">y=</span><span class="st">'Rent'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="week-06_files/figure-html/unnamed-chunk-29-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Notice how the slopes of these lines are different. This means that the relationship between income and rent is different depending on which category you’re in.</p>
+<p>If the lines aren’t parallel, income “matters” differently in different rings. A plain categorical can only shift the line <strong>up or down</strong>. An interaction lets it <strong>tilt</strong>.</p>
+</section>
+<section id="fit-and-read-it" class="level3">
+<h3 data-anchor-id="fit-and-read-it">Fit and read it</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>f_int <span class="ot">&lt;-</span> rent <span class="sc">~</span> <span class="fu">log</span>(income) <span class="sc">*</span> ring <span class="sc">+</span> pct_renter <span class="sc">+</span> bldg_age <span class="sc">+</span> <span class="fu">I</span>(bldg_age<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a>m_int <span class="ot">&lt;-</span> <span class="fu">lm</span>(f_int, <span class="at">data =</span> tracts)</span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(m_int)[<span class="fu">grep</span>(<span class="st">'income'</span>, <span class="fu">names</span>(<span class="fu">coef</span>(m_int)))]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>          log(income) log(income):ringInner log(income):ringOuter 
+             653.6974             -219.1028             -244.4214 </code></pre>
+</div>
+</div>
+<p><code>a * b</code> gives you <code>a, b</code> and <code>a:b</code>.</p>
+<ul>
+<li><p>Slope of <code>log(income)</code> in <code>Core</code> (the reference) = <code>log(income)</code></p></li>
+<li><p>Slope in <code>Outer = log(income) + log(income):ringOuter</code></p></li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>model_log <span class="ot">&lt;-</span> model_log <span class="sc">|&gt;</span> </span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_row</span>(<span class="at">model =</span> <span class="st">'m5'</span>, <span class="at">added=</span><span class="st">'log(income) x ring'</span>,</span>
+<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a>          <span class="at">cv_rmse =</span> <span class="fu">cv_rmse</span>(f_int, tracts))</span>
+<span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a>model_log</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 3
+  model added                      cv_rmse
+  &lt;chr&gt; &lt;chr&gt;                        &lt;dbl&gt;
+1 m0    baseline                      265.
+2 m1    log(income)                   265.
+3 m2    log(rent) + log(income)       263.
+4 m3    + bldg_age^2                  261.
+5 m4    ring instead of dist_ch_mi    265.
+6 m5    log(income) x ring            264.</code></pre>
+</div>
+</div>
+<p><strong>Use interactions when you have a reason</strong>, not by crossing everything with everything. Each one adds <span class="math inline">\(k-1\)</span> more coefficients to estimate from the same 380-ish tracts.</p>
+</section>
+</section>
+<section id="part-5-fixed-effects" class="level2">
+<h2 data-anchor-id="part-5-fixed-effects">Part 5: Fixed effects</h2>
+<section id="a-categorical-variable-for-place" class="level3">
+<h3 data-anchor-id="a-categorical-variable-for-place">A categorical variable for <em>place</em></h3>
+<p>A <strong>fixed effect</strong> is a categorical variable for a group of observations, usually a place: one dummy per neighborhood, district, or county.</p>
+<p>It soaks up everything constant about that place that you didn’t measure: reputation, school catchments, transit, history, the stuff you’d never find in the table.</p>
+<p>We’ll use Philadelphia’s 18 planning districts:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>districts <span class="ot">&lt;-</span> <span class="fu">st_read</span>(</span>
+<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">"https://services.arcgis.com/fLeGjb7u4uXqeF9q/arcgis/rest/services/Planning_Districts/FeatureServer/0/query?outFields=*&amp;where=1%3D1&amp;f=geojson"</span>,</span>
+<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">quiet=</span><span class="cn">TRUE</span></span>
+<span id="cb54-4"><a href="#cb54-4" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span> <span class="fu">st_transform</span>(<span class="dv">2272</span>)</span>
+<span id="cb54-5"><a href="#cb54-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-6"><a href="#cb54-6" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(districts)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "objectid"      "dist_name"     "abbrev"        "Shape__Area"  
+[5] "Shape__Length" "geometry"     </code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="week-06_files/figure-html/unnamed-chunk-33-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="assign-each-tract-to-a-district" class="level3">
+<h3 data-anchor-id="assign-each-tract-to-a-district">Assign each tract to a district</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb56"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a>tracts <span class="ot">&lt;-</span> tracts <span class="sc">|&gt;</span> </span>
+<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_join</span>(districts <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="at">district=</span>dist_name), <span class="at">largest=</span><span class="cn">TRUE</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb56-3"><a href="#cb56-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">district=</span><span class="fu">factor</span>(district)) </span>
+<span id="cb56-4"><a href="#cb56-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb56-5"><a href="#cb56-5" aria-hidden="true" tabindex="-1"></a>tracts <span class="sc">|&gt;</span> <span class="fu">st_drop_geometry</span>() <span class="sc">|&gt;</span> <span class="fu">count</span>(district, <span class="at">sort=</span><span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>               district  n
+1               Central 47
+2           Upper North 31
+3                 North 30
+4                 South 30
+5           Lower North 27
+6       Upper Northwest 26
+7                  West 26
+8  University Southwest 21
+9        North Delaware 19
+10      Lower Northeast 18
+11      Lower Northwest 17
+12          River Wards 17
+13    Central Northeast 16
+14  Lower Far Northeast 15
+15  Upper Far Northeast 13
+16            West Park 13
+17      Lower Southwest 10
+18          Lower South  1</code></pre>
+</div>
+</div>
+<p><code>largest = TRUE</code> means that if a tract straddles a boundary, it goes to whatever has most of its area. One tract, one district.</p>
+</section>
+<section id="numbers-that-are-really-labels" class="level3">
+<h3 data-anchor-id="numbers-that-are-really-labels">Numbers that are really labels</h3>
+<p>If districts came coded 1-18, this would run without complaint:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb58"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a>tracts <span class="ot">&lt;-</span> tracts <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">district_num =</span> <span class="fu">as.numeric</span>(district)) </span>
+<span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(<span class="fu">lm</span>(rent <span class="sc">~</span> district_num, <span class="at">data=</span>tracts))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> (Intercept) district_num 
+  1575.68541    -20.96668 </code></pre>
+</div>
+</div>
+</section>
+<section id="add-the-fixed-effect" class="level3">
+<h3 data-anchor-id="add-the-fixed-effect">Add the fixed effect</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb60"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a>f_fe <span class="ot">&lt;-</span> rent <span class="sc">~</span> <span class="fu">log</span>(income) <span class="sc">+</span> pct_renter <span class="sc">+</span>  bldg_age <span class="sc">+</span> <span class="fu">I</span>(bldg_age<span class="sc">^</span><span class="dv">2</span>) <span class="sc">+</span> district</span>
+<span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a>m_fe <span class="ot">&lt;-</span> <span class="fu">lm</span>(f_fe, <span class="at">data=</span>tracts) </span>
+<span id="cb60-3"><a href="#cb60-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-4"><a href="#cb60-4" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(m_sq)[<span class="st">'log(income)'</span>] <span class="co"># before</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>log(income) 
+   519.7439 </code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb62"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(m_fe)[<span class="st">'log(income)'</span>] <span class="co"># after</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>log(income) 
+   427.3889 </code></pre>
+</div>
+</div>
+<p><strong>Why did the income coefficient change?</strong> Before, it compared tracts across the whole city. Now it compares tracts <strong>within the same district</strong>. Some of what looked liked ‘income’ was really ‘being in a district where everything is more expensive’.</p>
+<p>That’s a <span class="math inline">\(\hat{\beta}\)</span> story. For <span class="math inline">\(\hat{y}\)</span>, the question is just: <strong>did it predict better</strong>?</p>
+</section>
+<section id="each-districts-intercept" class="level3">
+<h3 data-anchor-id="each-districts-intercept">Each district’s intercept</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb64"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a>fe_coefs <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">term=</span><span class="fu">names</span>(<span class="fu">coef</span>(m_fe)), <span class="at">est=</span><span class="fu">coef</span>(m_fe)) <span class="sc">|&gt;</span> </span>
+<span id="cb64-2"><a href="#cb64-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">str_starts</span>(term, <span class="st">'district'</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb64-3"><a href="#cb64-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">term=</span><span class="fu">str_remove</span>(term, <span class="st">'district'</span>)) </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb65"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb65-1"><a href="#cb65-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(fe_coefs, <span class="fu">aes</span>(est, <span class="fu">reorder</span>(term,est))) <span class="sc">+</span> </span>
+<span id="cb65-2"><a href="#cb65-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>() <span class="sc">+</span> </span>
+<span id="cb65-3"><a href="#cb65-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x=</span><span class="fu">paste</span>(<span class="st">'Rent difference vs.'</span>, <span class="fu">levels</span>(tracts<span class="sc">$</span>district)[<span class="dv">1</span>], <span class="st">'(the reference)'</span>),</span>
+<span id="cb65-4"><a href="#cb65-4" aria-hidden="true" tabindex="-1"></a>       <span class="at">y=</span><span class="cn">NULL</span>) <span class="sc">+</span> </span>
+<span id="cb65-5"><a href="#cb65-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_family=</span><span class="st">'jakarta'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="week-06_files/figure-html/unnamed-chunk-39-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>This is the “price of being there”, after income, tenure, and age. It tells you <strong>where</strong>, not <strong>why</strong>.</p>
+</section>
+<section id="did-it-absorb-the-clusters" class="level3">
+<h3 data-anchor-id="did-it-absorb-the-clusters">Did it absorb the clusters?</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb66"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a>tracts <span class="ot">&lt;-</span> tracts <span class="sc">|&gt;</span> </span>
+<span id="cb66-2"><a href="#cb66-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">resid_before =</span> <span class="fu">residuals</span>(m_sq),</span>
+<span id="cb66-3"><a href="#cb66-3" aria-hidden="true" tabindex="-1"></a>         <span class="at">resid_fe =</span> <span class="fu">residuals</span>(m_fe))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb67"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb67-1"><a href="#cb67-1" aria-hidden="true" tabindex="-1"></a>map_resid <span class="ot">&lt;-</span> <span class="cf">function</span>(var, title) {</span>
+<span id="cb67-2"><a href="#cb67-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(tracts) <span class="sc">+</span> </span>
+<span id="cb67-3"><a href="#cb67-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_sf</span>(<span class="fu">aes</span>(<span class="at">fill=</span>.data[[var]]), <span class="at">color=</span><span class="cn">NA</span>) <span class="sc">+</span> </span>
+<span id="cb67-4"><a href="#cb67-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_fill_gradient2</span>(<span class="at">low=</span><span class="st">'#2166ac'</span>, <span class="at">mid=</span><span class="st">'grey95'</span>, <span class="at">high=</span><span class="st">'#b2182b'</span>, <span class="at">midpoint=</span><span class="dv">0</span>, <span class="at">limits =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">900</span>, <span class="dv">900</span>), <span class="at">oob=</span>scales<span class="sc">::</span>squish) <span class="sc">+</span> </span>
+<span id="cb67-5"><a href="#cb67-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">title=</span>title, <span class="at">fill=</span><span class="st">'Residual'</span>) <span class="sc">+</span> <span class="fu">theme_void</span>(<span class="at">base_family=</span><span class="st">'jakarta'</span>)</span>
+<span id="cb67-6"><a href="#cb67-6" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb67-7"><a href="#cb67-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb67-8"><a href="#cb67-8" aria-hidden="true" tabindex="-1"></a><span class="fu">map_resid</span>(<span class="st">'resid_before'</span>, <span class="st">'Without district FE'</span>) <span class="sc">+</span> <span class="fu">map_resid</span>(<span class="st">'resid_fe'</span>, <span class="st">'With district FE'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="week-06_files/figure-html/unnamed-chunk-41-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="into-the-model-log" class="level3">
+<h3 data-anchor-id="into-the-model-log">Into the model log</h3>
+<p>The code below merges some small tracts together (we did this because we have very small observations in some)</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb68"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb68-1"><a href="#cb68-1" aria-hidden="true" tabindex="-1"></a>small <span class="ot">&lt;-</span> tracts <span class="sc">%&gt;%</span> <span class="fu">st_drop_geometry</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb68-2"><a href="#cb68-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(district) <span class="sc">%&gt;%</span> <span class="fu">filter</span>(n <span class="sc">&lt;</span> <span class="dv">10</span> <span class="sc">|</span> <span class="fu">is.na</span>(district)) <span class="sc">%&gt;%</span> <span class="fu">pull</span>(district)</span>
+<span id="cb68-3"><a href="#cb68-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb68-4"><a href="#cb68-4" aria-hidden="true" tabindex="-1"></a>is_small <span class="ot">&lt;-</span> tracts<span class="sc">$</span>district <span class="sc">%in%</span> small <span class="sc">|</span> <span class="fu">is.na</span>(tracts<span class="sc">$</span>district)</span>
+<span id="cb68-5"><a href="#cb68-5" aria-hidden="true" tabindex="-1"></a>nearest  <span class="ot">&lt;-</span> <span class="fu">st_nearest_feature</span>(tracts[is_small, ], tracts[<span class="sc">!</span>is_small, ])</span>
+<span id="cb68-6"><a href="#cb68-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb68-7"><a href="#cb68-7" aria-hidden="true" tabindex="-1"></a>tracts <span class="ot">&lt;-</span> tracts <span class="sc">%&gt;%</span></span>
+<span id="cb68-8"><a href="#cb68-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">district_cv =</span> <span class="fu">as.character</span>(district))</span>
+<span id="cb68-9"><a href="#cb68-9" aria-hidden="true" tabindex="-1"></a>tracts<span class="sc">$</span>district_cv[is_small] <span class="ot">&lt;-</span> <span class="fu">as.character</span>(tracts<span class="sc">$</span>district[<span class="sc">!</span>is_small][nearest])</span>
+<span id="cb68-10"><a href="#cb68-10" aria-hidden="true" tabindex="-1"></a>tracts <span class="ot">&lt;-</span> tracts <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">district_cv =</span> <span class="fu">factor</span>(district_cv))</span>
+<span id="cb68-11"><a href="#cb68-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb68-12"><a href="#cb68-12" aria-hidden="true" tabindex="-1"></a>tracts <span class="sc">%&gt;%</span> <span class="fu">st_drop_geometry</span>() <span class="sc">%&gt;%</span> <span class="fu">count</span>(district_cv) <span class="sc">%&gt;%</span> <span class="fu">arrange</span>(n) <span class="sc">%&gt;%</span> <span class="fu">head</span>(<span class="dv">5</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>          district_cv  n
+1     Lower Southwest 10
+2 Upper Far Northeast 13
+3           West Park 13
+4 Lower Far Northeast 15
+5   Central Northeast 16</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb70"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb70-1"><a href="#cb70-1" aria-hidden="true" tabindex="-1"></a>f_fe_cv <span class="ot">&lt;-</span> rent <span class="sc">~</span> <span class="fu">log</span>(income) <span class="sc">+</span> pct_renter <span class="sc">+</span> bldg_age <span class="sc">+</span> <span class="fu">I</span>(bldg_age<span class="sc">^</span><span class="dv">2</span>) <span class="sc">+</span> district_cv</span>
+<span id="cb70-2"><a href="#cb70-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb70-3"><a href="#cb70-3" aria-hidden="true" tabindex="-1"></a>model_log <span class="ot">&lt;-</span> model_log <span class="sc">|&gt;</span> </span>
+<span id="cb70-4"><a href="#cb70-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_row</span>(<span class="at">model=</span><span class="st">'m6'</span>, <span class="at">added=</span><span class="st">'+ district FE (small ones merged with neighbors)'</span>, <span class="at">cv_rmse =</span> <span class="fu">cv_rmse</span>(f_fe_cv, tracts))</span>
+<span id="cb70-5"><a href="#cb70-5" aria-hidden="true" tabindex="-1"></a>model_log</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 7 × 3
+  model added                                            cv_rmse
+  &lt;chr&gt; &lt;chr&gt;                                              &lt;dbl&gt;
+1 m0    baseline                                            265.
+2 m1    log(income)                                         265.
+3 m2    log(rent) + log(income)                             263.
+4 m3    + bldg_age^2                                        261.
+5 m4    ring instead of dist_ch_mi                          265.
+6 m5    log(income) x ring                                  264.
+7 m6    + district FE (small ones merged with neighbors)    256.</code></pre>
+</div>
+</div>
+</section>
+<section id="check-group-sizes-first-every-time" class="level3">
+<h3 data-anchor-id="check-group-sizes-first-every-time">Check group sizes first, every time</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb72"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb72-1"><a href="#cb72-1" aria-hidden="true" tabindex="-1"></a>tracts <span class="sc">|&gt;</span> <span class="fu">st_drop_geometry</span>() <span class="sc">|&gt;</span> <span class="fu">count</span>(district) <span class="sc">|&gt;</span> <span class="fu">arrange</span>(n) <span class="sc">|&gt;</span> <span class="fu">head</span>(<span class="dv">5</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>             district  n
+1         Lower South  1
+2     Lower Southwest 10
+3 Upper Far Northeast 13
+4           West Park 13
+5 Lower Far Northeast 15</code></pre>
+</div>
+</div>
+<p>Rule of thumb: <strong>at least ~10 observations per group for 10-fold CV, more is safer.</strong></p>
+<p>If a group is too small:</p>
+<ul>
+<li><p><strong>Merge it with a neighbor</strong> that makes sense geographically or substantively (best)</p></li>
+<li><p>Lump small groups into “other” with <code>fct_lump_min(district, min=10)</code> (quick, but “Other” may be a nonsense group of cities scattered across the city</p></li>
+<li><p>Use a coarser geography</p></li>
+</ul>
+</section>
+</section>
+<section id="putting-it-all-together" class="level2">
+<h2 data-anchor-id="putting-it-all-together">6. Putting it all together</h2>
+<section id="what-the-log-says" class="level3">
+<h3 data-anchor-id="what-the-log-says">What the log says</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb74"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb74-1"><a href="#cb74-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(model_log, <span class="fu">aes</span>(cv_rmse, <span class="fu">fct_inorder</span>(<span class="fu">paste</span>(model, added)))) <span class="sc">+</span></span>
+<span id="cb74-2"><a href="#cb74-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">3</span>, <span class="fu">aes</span>(<span class="at">color =</span> cv_rmse)) <span class="sc">+</span></span>
+<span id="cb74-3"><a href="#cb74-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">'CV RMSE ($)'</span>, <span class="at">y =</span> <span class="cn">NULL</span>, <span class="at">color =</span> <span class="st">'CV RMSE ($)'</span>) <span class="sc">+</span></span>
+<span id="cb74-4"><a href="#cb74-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_distiller</span>(<span class="at">palette =</span> <span class="st">'YlOrRd'</span>, <span class="at">direction =</span> <span class="sc">-</span><span class="dv">1</span>, <span class="at">guide =</span> <span class="fu">guide_colorbar</span>(<span class="at">reverse =</span> <span class="cn">TRUE</span>)) <span class="sc">+</span></span>
+<span id="cb74-5"><a href="#cb74-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_family =</span> <span class="st">'jakarta'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="week-06_files/figure-html/unnamed-chunk-45-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Some moves help, some don’t, some hurt. That’s the finding. You wouldn’t know without the same folds and the same rows.</p>
+
+
+<!-- -->
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+    const viewSource = window.document.getElementById('quarto-view-source') ||
+                       window.document.getElementById('quarto-code-tools-source');
+    if (viewSource) {
+      const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+      viewSource.addEventListener("click", function(e) {
+        if (sourceUrl) {
+          // rstudio viewer pane
+          if (/\bcapabilities=\b/.test(window.location)) {
+            window.open(sourceUrl);
+          } else {
+            window.location.href = sourceUrl;
+          }
+        } else {
+          const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+          modal.show();
+        }
+        return false;
+      });
+    }
+    function toggleCodeHandler(show) {
+      return function(e) {
+        const cellDetails = window.document.querySelectorAll(".cell details.code-fold");
+        for (let i=0; i<cellDetails.length; i++) {
+          const details = cellDetails[i];
+          if (show) {
+            details.open = true;
+          } else {
+            details.removeAttribute("open");
+          }
+        }
+        const cellCodeDivs = window.document.querySelectorAll(".cell div.sourceCode.cell-code");
+        const fromCls = show ? "hidden" : "unhidden";
+        const toCls = show ? "unhidden" : "hidden";
+        for (let i=0; i<cellCodeDivs.length; i++) {
+          const codeDiv = cellCodeDivs[i];
+          if (codeDiv.classList.contains(fromCls)) {
+            codeDiv.classList.remove(fromCls);
+            codeDiv.classList.add(toCls);
+          } 
+        }
+        return false;
+      }
+    }
+    const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+    if (hideAllCode) {
+      hideAllCode.addEventListener("click", toggleCodeHandler(false));
+    }
+    const showAllCode = window.document.getElementById("quarto-show-all-code");
+    if (showAllCode) {
+      showAllCode.addEventListener("click", toggleCodeHandler(true));
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb75" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb75-1"><a href="#cb75-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb75-2"><a href="#cb75-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Week 6: Feature Engineering"</span></span>
+<span id="cb75-3"><a href="#cb75-3" aria-hidden="true" tabindex="-1"></a><span class="an">description:</span><span class="co"> 'Working with different kinds of models.'</span></span>
+<span id="cb75-4"><a href="#cb75-4" aria-hidden="true" tabindex="-1"></a><span class="an">date:</span><span class="co"> 10-09-2026</span></span>
+<span id="cb75-5"><a href="#cb75-5" aria-hidden="true" tabindex="-1"></a><span class="an">editor:</span><span class="co"> visual</span></span>
+<span id="cb75-6"><a href="#cb75-6" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb75-7"><a href="#cb75-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-8"><a href="#cb75-8" aria-hidden="true" tabindex="-1"></a><span class="fu">## Feature Engineering </span></span>
+<span id="cb75-9"><a href="#cb75-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-10"><a href="#cb75-10" aria-hidden="true" tabindex="-1"></a>A linear model can only draw straight lines through whatever you give it. Feature engineering is deciding what you give it.</span>
+<span id="cb75-11"><a href="#cb75-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-12"><a href="#cb75-12" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span>   <span class="pp">|</span> Happens to $\hat{y}$ (prediction) <span class="pp">|</span> Happens to $\hat{\beta}$ (reading coefficients) <span class="pp">|</span></span>
+<span id="cb75-13"><a href="#cb75-13" aria-hidden="true" tabindex="-1"></a><span class="pp">|----------------|-------------------------|-------------------------------|</span></span>
+<span id="cb75-14"><a href="#cb75-14" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Logs <span class="pp">|</span> Better fit on skewed data <span class="pp">|</span> Read in percentages, not units <span class="pp">|</span></span>
+<span id="cb75-15"><a href="#cb75-15" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Squared terms <span class="pp">|</span> Line can bend <span class="pp">|</span> No single coefficient means anything alone <span class="pp">|</span></span>
+<span id="cb75-16"><a href="#cb75-16" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Categories <span class="pp">|</span> Captures jumps and non-smooth patterns <span class="pp">|</span> Every coefficient is a comparison to a reference group <span class="pp">|</span></span>
+<span id="cb75-17"><a href="#cb75-17" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Interactions <span class="pp">|</span> Slopes can differ by group <span class="pp">|</span> Effect depends on which group you're in <span class="pp">|</span></span>
+<span id="cb75-18"><a href="#cb75-18" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Fixed effects <span class="pp">|</span> Absorbs everything about a place you didn't measure <span class="pp">|</span> Tells you *where*, never *why* <span class="pp">|</span></span>
+<span id="cb75-19"><a href="#cb75-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-20"><a href="#cb75-20" aria-hidden="true" tabindex="-1"></a>We judge these by $\text{CV RMSE}$, not by $p$-values.</span>
+<span id="cb75-21"><a href="#cb75-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-22"><a href="#cb75-22" aria-hidden="true" tabindex="-1"></a><span class="fu">### Setup: the same tracts as Week 5</span></span>
+<span id="cb75-23"><a href="#cb75-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-26"><a href="#cb75-26" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb75-27"><a href="#cb75-27" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb75-28"><a href="#cb75-28" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidycensus) </span>
+<span id="cb75-29"><a href="#cb75-29" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sf)</span>
+<span id="cb75-30"><a href="#cb75-30" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(patchwork)</span>
+<span id="cb75-31"><a href="#cb75-31" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">tigris_use_cache =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb75-32"><a href="#cb75-32" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(showtext)</span>
+<span id="cb75-33"><a href="#cb75-33" aria-hidden="true" tabindex="-1"></a><span class="fu">font_add_google</span>(<span class="st">"Plus Jakarta Sans"</span>, <span class="st">"jakarta"</span>)</span>
+<span id="cb75-34"><a href="#cb75-34" aria-hidden="true" tabindex="-1"></a><span class="fu">showtext_auto</span>()</span>
+<span id="cb75-35"><a href="#cb75-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-36"><a href="#cb75-36" aria-hidden="true" tabindex="-1"></a><span class="fu">census_api_key</span>(<span class="fu">Sys.getenv</span>(<span class="st">'CENSUS_API_KEY'</span>))</span>
+<span id="cb75-37"><a href="#cb75-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-38"><a href="#cb75-38" aria-hidden="true" tabindex="-1"></a>tracts_raw <span class="ot">&lt;-</span> <span class="fu">get_acs</span>(</span>
+<span id="cb75-39"><a href="#cb75-39" aria-hidden="true" tabindex="-1"></a>  <span class="at">geography =</span> <span class="st">'tract'</span>, <span class="at">state =</span> <span class="st">'PA'</span>, <span class="at">county =</span> <span class="st">'Philadelphia'</span>,</span>
+<span id="cb75-40"><a href="#cb75-40" aria-hidden="true" tabindex="-1"></a>  <span class="at">variables =</span> <span class="fu">c</span>(</span>
+<span id="cb75-41"><a href="#cb75-41" aria-hidden="true" tabindex="-1"></a>    <span class="at">rent =</span> <span class="st">'B25064_001'</span>,</span>
+<span id="cb75-42"><a href="#cb75-42" aria-hidden="true" tabindex="-1"></a>    <span class="at">income =</span> <span class="st">'B19013_001'</span>,</span>
+<span id="cb75-43"><a href="#cb75-43" aria-hidden="true" tabindex="-1"></a>    <span class="at">pop =</span> <span class="st">'B01003_001'</span>,</span>
+<span id="cb75-44"><a href="#cb75-44" aria-hidden="true" tabindex="-1"></a>    <span class="at">yr_built =</span> <span class="st">'B25035_001'</span>,</span>
+<span id="cb75-45"><a href="#cb75-45" aria-hidden="true" tabindex="-1"></a>    <span class="at">hh_total =</span> <span class="st">'B25003_001'</span>,</span>
+<span id="cb75-46"><a href="#cb75-46" aria-hidden="true" tabindex="-1"></a>    <span class="at">hh_renter =</span> <span class="st">'B25003_003'</span>),</span>
+<span id="cb75-47"><a href="#cb75-47" aria-hidden="true" tabindex="-1"></a>   <span class="at">year =</span> <span class="dv">2023</span>, <span class="at">survey =</span> <span class="st">'acs5'</span>, <span class="at">output =</span> <span class="st">'wide'</span>, <span class="at">geometry =</span> <span class="cn">TRUE</span></span>
+<span id="cb75-48"><a href="#cb75-48" aria-hidden="true" tabindex="-1"></a>  )<span class="sc">|&gt;</span> </span>
+<span id="cb75-49"><a href="#cb75-49" aria-hidden="true" tabindex="-1"></a>    <span class="fu">st_transform</span>(<span class="dv">2272</span>)</span>
+<span id="cb75-50"><a href="#cb75-50" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb75-51"><a href="#cb75-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-52"><a href="#cb75-52" aria-hidden="true" tabindex="-1"></a><span class="fu">### Build the predictors once, then drop missing rows once </span></span>
+<span id="cb75-53"><a href="#cb75-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-56"><a href="#cb75-56" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb75-57"><a href="#cb75-57" aria-hidden="true" tabindex="-1"></a>city_hall <span class="ot">&lt;-</span> <span class="fu">st_sfc</span>(<span class="fu">st_point</span>(<span class="fu">c</span>(<span class="sc">-</span><span class="fl">75.1636</span>, <span class="fl">39.9526</span>)), <span class="at">crs=</span><span class="dv">4326</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb75-58"><a href="#cb75-58" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_transform</span>(<span class="dv">2272</span>)</span>
+<span id="cb75-59"><a href="#cb75-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-60"><a href="#cb75-60" aria-hidden="true" tabindex="-1"></a>tracts <span class="ot">&lt;-</span> tracts_raw <span class="sc">|&gt;</span> </span>
+<span id="cb75-61"><a href="#cb75-61" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb75-62"><a href="#cb75-62" aria-hidden="true" tabindex="-1"></a>    <span class="at">rent =</span> rentE,</span>
+<span id="cb75-63"><a href="#cb75-63" aria-hidden="true" tabindex="-1"></a>    <span class="at">rent_moe =</span> rentM, </span>
+<span id="cb75-64"><a href="#cb75-64" aria-hidden="true" tabindex="-1"></a>    <span class="at">income =</span> incomeE,</span>
+<span id="cb75-65"><a href="#cb75-65" aria-hidden="true" tabindex="-1"></a>    <span class="at">bldg_age =</span> <span class="dv">2023</span> <span class="sc">-</span> yr_builtE,</span>
+<span id="cb75-66"><a href="#cb75-66" aria-hidden="true" tabindex="-1"></a>    <span class="at">pct_renter =</span> <span class="dv">100</span> <span class="sc">*</span> hh_renterE <span class="sc">/</span> hh_totalE,</span>
+<span id="cb75-67"><a href="#cb75-67" aria-hidden="true" tabindex="-1"></a>    <span class="at">dist_ch_mi =</span> <span class="fu">as.numeric</span>(<span class="fu">st_distance</span>(geometry, city_hall)) <span class="sc">/</span> <span class="dv">5280</span></span>
+<span id="cb75-68"><a href="#cb75-68" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb75-69"><a href="#cb75-69" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(GEOID, rent, rent_moe, income, bldg_age, pct_renter, dist_ch_mi) <span class="sc">|&gt;</span> </span>
+<span id="cb75-70"><a href="#cb75-70" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(rent), <span class="sc">!</span><span class="fu">is.na</span>(income), <span class="sc">!</span><span class="fu">is.na</span>(bldg_age), <span class="sc">!</span><span class="fu">is.na</span>(pct_renter))</span>
+<span id="cb75-71"><a href="#cb75-71" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-72"><a href="#cb75-72" aria-hidden="true" tabindex="-1"></a><span class="fu">nrow</span>(tracts)</span>
+<span id="cb75-73"><a href="#cb75-73" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb75-74"><a href="#cb75-74" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-75"><a href="#cb75-75" aria-hidden="true" tabindex="-1"></a>Every model today uses **these same rows**. If one model quietly drops tracts, its $\text{RMSE}$ isn't comparable.</span>
+<span id="cb75-76"><a href="#cb75-76" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-77"><a href="#cb75-77" aria-hidden="true" tabindex="-1"></a><span class="fu">### A $\text{CV}$ helper with fixed folds </span></span>
+<span id="cb75-78"><a href="#cb75-78" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-79"><a href="#cb75-79" aria-hidden="true" tabindex="-1"></a>Same idea as <span class="in">`cv_rmse()`</span> in your template. Same folds for every model, so differences come from the features, not luck.</span>
+<span id="cb75-80"><a href="#cb75-80" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-83"><a href="#cb75-83" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb75-84"><a href="#cb75-84" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">5080</span>)</span>
+<span id="cb75-85"><a href="#cb75-85" aria-hidden="true" tabindex="-1"></a>folds <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="fu">rep</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>, <span class="at">length.out =</span> <span class="fu">nrow</span>(tracts)))</span>
+<span id="cb75-86"><a href="#cb75-86" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-87"><a href="#cb75-87" aria-hidden="true" tabindex="-1"></a><span class="co"># Function that calculates cv rmse through k-fold validation: </span></span>
+<span id="cb75-88"><a href="#cb75-88" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-89"><a href="#cb75-89" aria-hidden="true" tabindex="-1"></a>cv_rmse <span class="ot">&lt;-</span> <span class="cf">function</span>(f, data, <span class="at">log_outcome =</span> <span class="cn">FALSE</span>) {</span>
+<span id="cb75-90"><a href="#cb75-90" aria-hidden="true" tabindex="-1"></a>  preds <span class="ot">&lt;-</span> <span class="fu">numeric</span>(<span class="fu">nrow</span>(data))</span>
+<span id="cb75-91"><a href="#cb75-91" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (k <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>) {</span>
+<span id="cb75-92"><a href="#cb75-92" aria-hidden="true" tabindex="-1"></a>    m <span class="ot">&lt;-</span> <span class="fu">lm</span>(f, data[folds <span class="sc">!=</span> k, ])</span>
+<span id="cb75-93"><a href="#cb75-93" aria-hidden="true" tabindex="-1"></a>    p <span class="ot">&lt;-</span> <span class="fu">predict</span>(m, <span class="at">newdata =</span> data[folds<span class="sc">==</span>k, ])</span>
+<span id="cb75-94"><a href="#cb75-94" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (log_outcome) p <span class="ot">&lt;-</span> <span class="fu">exp</span>(p)</span>
+<span id="cb75-95"><a href="#cb75-95" aria-hidden="true" tabindex="-1"></a>    preds[folds <span class="sc">==</span> k] <span class="ot">&lt;-</span> p</span>
+<span id="cb75-96"><a href="#cb75-96" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb75-97"><a href="#cb75-97" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sqrt</span>(<span class="fu">mean</span>((data<span class="sc">$</span>rent <span class="sc">-</span> preds)<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb75-98"><a href="#cb75-98" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb75-99"><a href="#cb75-99" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb75-100"><a href="#cb75-100" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-101"><a href="#cb75-101" aria-hidden="true" tabindex="-1"></a><span class="fu">### Baseline, and the model log (record)</span></span>
+<span id="cb75-102"><a href="#cb75-102" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-105"><a href="#cb75-105" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb75-106"><a href="#cb75-106" aria-hidden="true" tabindex="-1"></a>f0 <span class="ot">&lt;-</span> rent <span class="sc">~</span> income <span class="sc">+</span> pct_renter <span class="sc">+</span> bldg_age <span class="sc">+</span> dist_ch_mi</span>
+<span id="cb75-107"><a href="#cb75-107" aria-hidden="true" tabindex="-1"></a>m0 <span class="ot">&lt;-</span> <span class="fu">lm</span>(f0, <span class="at">data =</span> tracts)</span>
+<span id="cb75-108"><a href="#cb75-108" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-109"><a href="#cb75-109" aria-hidden="true" tabindex="-1"></a>model_log <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">model =</span> <span class="st">'m0'</span>, <span class="at">added =</span> <span class="st">'baseline'</span>,</span>
+<span id="cb75-110"><a href="#cb75-110" aria-hidden="true" tabindex="-1"></a>                    <span class="at">cv_rmse =</span> <span class="fu">cv_rmse</span>(f0, tracts))</span>
+<span id="cb75-111"><a href="#cb75-111" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-112"><a href="#cb75-112" aria-hidden="true" tabindex="-1"></a>model_log</span>
+<span id="cb75-113"><a href="#cb75-113" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb75-114"><a href="#cb75-114" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-115"><a href="#cb75-115" aria-hidden="true" tabindex="-1"></a>In this model, we can predict the rent within about \$265.</span>
+<span id="cb75-116"><a href="#cb75-116" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-117"><a href="#cb75-117" aria-hidden="true" tabindex="-1"></a>Every section ends the same way: **fit it, cross-validate it on the same folds, add a row.**</span>
+<span id="cb75-118"><a href="#cb75-118" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-119"><a href="#cb75-119" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 1: $\text{log}$ transformations </span></span>
+<span id="cb75-120"><a href="#cb75-120" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-121"><a href="#cb75-121" aria-hidden="true" tabindex="-1"></a><span class="fu">### Why $\text{log}$? Skew. </span></span>
+<span id="cb75-122"><a href="#cb75-122" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-125"><a href="#cb75-125" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb75-126"><a href="#cb75-126" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: false </span></span>
+<span id="cb75-127"><a href="#cb75-127" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(patchwork)</span>
+<span id="cb75-128"><a href="#cb75-128" aria-hidden="true" tabindex="-1"></a>p1 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(tracts, <span class="fu">aes</span>(income)) <span class="sc">+</span> <span class="fu">geom_histogram</span>(<span class="at">fill=</span><span class="st">'tomato3'</span>, <span class="at">bins=</span><span class="dv">40</span>) <span class="sc">+</span> <span class="fu">labs</span>(<span class="at">title=</span><span class="st">'Income'</span>, <span class="at">x=</span><span class="cn">NULL</span>, <span class="at">y=</span><span class="st">'Count'</span>) <span class="sc">+</span> <span class="fu">theme_minimal</span>(<span class="at">base_family=</span><span class="st">'jakarta'</span>)</span>
+<span id="cb75-129"><a href="#cb75-129" aria-hidden="true" tabindex="-1"></a>p2 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(tracts, <span class="fu">aes</span>(<span class="fu">log</span>(income))) <span class="sc">+</span> <span class="fu">geom_histogram</span>(<span class="at">fill=</span><span class="st">'tomato3'</span>, <span class="at">bins=</span><span class="dv">40</span>) <span class="sc">+</span> <span class="fu">labs</span>(<span class="at">title=</span><span class="st">'log(Income)'</span>, <span class="at">x=</span><span class="cn">NULL</span>, <span class="at">y=</span><span class="st">'Count'</span>) <span class="sc">+</span> <span class="fu">theme_minimal</span>(<span class="at">base_family=</span><span class="st">'jakarta'</span>)</span>
+<span id="cb75-130"><a href="#cb75-130" aria-hidden="true" tabindex="-1"></a>p1<span class="sc">+</span>p2</span>
+<span id="cb75-131"><a href="#cb75-131" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb75-132"><a href="#cb75-132" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-133"><a href="#cb75-133" aria-hidden="true" tabindex="-1"></a>Long right tail: a few very rich tracts pull the line around. A log pulls the tail in, so equal percentage differences become equal differences.</span>
+<span id="cb75-134"><a href="#cb75-134" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-135"><a href="#cb75-135" aria-hidden="true" tabindex="-1"></a><span class="fu">### $\text{log}$ a predictor </span></span>
+<span id="cb75-136"><a href="#cb75-136" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-139"><a href="#cb75-139" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb75-140"><a href="#cb75-140" aria-hidden="true" tabindex="-1"></a>f_logx <span class="ot">&lt;-</span> rent <span class="sc">~</span> <span class="fu">log</span>(income) <span class="sc">+</span> pct_renter <span class="sc">+</span> bldg_age <span class="sc">+</span> dist_ch_mi</span>
+<span id="cb75-141"><a href="#cb75-141" aria-hidden="true" tabindex="-1"></a>m_logx <span class="ot">&lt;-</span> <span class="fu">lm</span>(f_logx, <span class="at">data=</span>tracts) </span>
+<span id="cb75-142"><a href="#cb75-142" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">coef</span>(m_logx)[<span class="st">'log(income)'</span>]</span>
+<span id="cb75-143"><a href="#cb75-143" aria-hidden="true" tabindex="-1"></a>b</span>
+<span id="cb75-144"><a href="#cb75-144" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb75-145"><a href="#cb75-145" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-148"><a href="#cb75-148" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb75-149"><a href="#cb75-149" aria-hidden="true" tabindex="-1"></a>b <span class="sc">/</span> <span class="dv">100</span> <span class="co"># rent change for a 1% increase in income </span></span>
+<span id="cb75-150"><a href="#cb75-150" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb75-151"><a href="#cb75-151" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-154"><a href="#cb75-154" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb75-155"><a href="#cb75-155" aria-hidden="true" tabindex="-1"></a>b <span class="sc">*</span> <span class="fu">log</span>(<span class="fl">1.10</span>) <span class="co"># rent change for a 10% increase in income (exact)</span></span>
+<span id="cb75-156"><a href="#cb75-156" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb75-157"><a href="#cb75-157" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-158"><a href="#cb75-158" aria-hidden="true" tabindex="-1"></a>**Reading it**: a **1% increase** in income goes with about $\beta$/100 dollars more rent, holding the other variables constant.</span>
+<span id="cb75-159"><a href="#cb75-159" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-162"><a href="#cb75-162" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb75-163"><a href="#cb75-163" aria-hidden="true" tabindex="-1"></a>model_log <span class="ot">&lt;-</span> model_log <span class="sc">|&gt;</span> </span>
+<span id="cb75-164"><a href="#cb75-164" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_row</span>(<span class="at">model =</span> <span class="st">'m1'</span>, <span class="at">added=</span><span class="st">'log(income)'</span>, <span class="at">cv_rmse=</span><span class="fu">cv_rmse</span>(f_logx, tracts))</span>
+<span id="cb75-165"><a href="#cb75-165" aria-hidden="true" tabindex="-1"></a>model_log</span>
+<span id="cb75-166"><a href="#cb75-166" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb75-167"><a href="#cb75-167" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-168"><a href="#cb75-168" aria-hidden="true" tabindex="-1"></a>Didn't really do much...</span>
+<span id="cb75-169"><a href="#cb75-169" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-170"><a href="#cb75-170" aria-hidden="true" tabindex="-1"></a><span class="fu">### The zero problem</span></span>
+<span id="cb75-171"><a href="#cb75-171" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-174"><a href="#cb75-174" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb75-175"><a href="#cb75-175" aria-hidden="true" tabindex="-1"></a><span class="fu">log</span>(<span class="dv">0</span>)</span>
+<span id="cb75-176"><a href="#cb75-176" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb75-177"><a href="#cb75-177" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-180"><a href="#cb75-180" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb75-181"><a href="#cb75-181" aria-hidden="true" tabindex="-1"></a><span class="fu">log1p</span>(<span class="dv">0</span>)</span>
+<span id="cb75-182"><a href="#cb75-182" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb75-183"><a href="#cb75-183" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-186"><a href="#cb75-186" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb75-187"><a href="#cb75-187" aria-hidden="true" tabindex="-1"></a><span class="fu">log1p</span>(<span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">10</span>, <span class="dv">100</span>))</span>
+<span id="cb75-188"><a href="#cb75-188" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb75-189"><a href="#cb75-189" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-190"><a href="#cb75-190" aria-hidden="true" tabindex="-1"></a>Your **counts** from the open data portal (crimes, trees, 311 calls) will have zeroes. <span class="in">`log(0)`</span> is <span class="in">`-Inf`</span> and <span class="in">`lm()`</span> will fail or silently misbehave.</span>
+<span id="cb75-191"><a href="#cb75-191" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-192"><a href="#cb75-192" aria-hidden="true" tabindex="-1"></a>Use <span class="in">`log1p(x)`</span> for anything that can be zero. The percentage reading becomes approximate for small values, which is fine.</span>
+<span id="cb75-193"><a href="#cb75-193" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-194"><a href="#cb75-194" aria-hidden="true" tabindex="-1"></a><span class="fu">### $\text{log}$ the outcome </span></span>
+<span id="cb75-195"><a href="#cb75-195" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-196"><a href="#cb75-196" aria-hidden="true" tabindex="-1"></a>Rent is skewed too:</span>
+<span id="cb75-197"><a href="#cb75-197" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-200"><a href="#cb75-200" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb75-201"><a href="#cb75-201" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: false </span></span>
+<span id="cb75-202"><a href="#cb75-202" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(tracts, <span class="fu">aes</span>(rent)) <span class="sc">+</span> <span class="fu">geom_histogram</span>(<span class="at">fill=</span><span class="st">'tomato3'</span>, <span class="at">binwidth=</span><span class="dv">40</span>) <span class="sc">+</span> <span class="fu">theme_minimal</span>(<span class="at">base_family=</span><span class="st">'jakarta'</span>) <span class="sc">+</span> <span class="fu">labs</span>(<span class="at">title=</span><span class="st">'Rent'</span>, <span class="at">y=</span><span class="st">'Count'</span>, <span class="at">x=</span><span class="cn">NULL</span>)</span>
+<span id="cb75-203"><a href="#cb75-203" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb75-204"><a href="#cb75-204" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-205"><a href="#cb75-205" aria-hidden="true" tabindex="-1"></a>Based on this, we can log $y$ instead of (or as well as) $x$.</span>
+<span id="cb75-206"><a href="#cb75-206" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-209"><a href="#cb75-209" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb75-210"><a href="#cb75-210" aria-hidden="true" tabindex="-1"></a>f_logy <span class="ot">&lt;-</span> <span class="fu">log</span>(rent) <span class="sc">~</span> <span class="fu">log</span>(income) <span class="sc">+</span> pct_renter <span class="sc">+</span> bldg_age <span class="sc">+</span> dist_ch_mi</span>
+<span id="cb75-211"><a href="#cb75-211" aria-hidden="true" tabindex="-1"></a>m_logy <span class="ot">&lt;-</span> <span class="fu">lm</span>(f_logy, <span class="at">data=</span>tracts)</span>
+<span id="cb75-212"><a href="#cb75-212" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(m_logy)</span>
+<span id="cb75-213"><a href="#cb75-213" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb75-214"><a href="#cb75-214" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-215"><a href="#cb75-215" aria-hidden="true" tabindex="-1"></a>**Interpretation**:</span>
+<span id="cb75-216"><a href="#cb75-216" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-217"><a href="#cb75-217" aria-hidden="true" tabindex="-1"></a><span class="in">`pct_renter`</span>: a 1-unit increase in $x$ goes with about a $100 * \beta$ % change in rent</span>
+<span id="cb75-218"><a href="#cb75-218" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-219"><a href="#cb75-219" aria-hidden="true" tabindex="-1"></a><span class="in">`log_income`</span>: $\text{log-log}$, so a 1% increase in income goes with about a $\beta$% change in rent (an elasticity)</span>
+<span id="cb75-220"><a href="#cb75-220" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-221"><a href="#cb75-221" aria-hidden="true" tabindex="-1"></a><span class="fu">### The four combinations </span></span>
+<span id="cb75-222"><a href="#cb75-222" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-223"><a href="#cb75-223" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Model <span class="pp">|</span> Formula <span class="pp">|</span> A coefficient $\beta$ means... <span class="pp">|</span></span>
+<span id="cb75-224"><a href="#cb75-224" aria-hidden="true" tabindex="-1"></a><span class="pp">|---------------------------|-------------------|---------------------------|</span></span>
+<span id="cb75-225"><a href="#cb75-225" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> level-level <span class="pp">|</span> <span class="in">`y ~ x`</span> <span class="pp">|</span> +1 unit of $x$ is + $\beta$ units of $y$ <span class="pp">|</span></span>
+<span id="cb75-226"><a href="#cb75-226" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> level-$\text{log}$ <span class="pp">|</span> <span class="in">`y ~ log(x)`</span> <span class="pp">|</span> +1% of $x$ is + $\beta/100$ units of $y$ <span class="pp">|</span></span>
+<span id="cb75-227"><a href="#cb75-227" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> $\text{log}$-level <span class="pp">|</span> <span class="in">`log(y) ~ x`</span> <span class="pp">|</span> +1 unit of $x$ is $\approx 100 * \beta$ % change in $y$ <span class="pp">|</span></span>
+<span id="cb75-228"><a href="#cb75-228" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> $\text{log-log}$ <span class="pp">|</span> <span class="in">`log(y) ~ log(x)`</span> <span class="pp">|</span> +1% of $x$ is $\approx\beta$ % change in $y$ <span class="pp">|</span></span>
+<span id="cb75-229"><a href="#cb75-229" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-230"><a href="#cb75-230" aria-hidden="true" tabindex="-1"></a>The $\approx$ gets worse as $\beta$ gets large.</span>
+<span id="cb75-231"><a href="#cb75-231" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-232"><a href="#cb75-232" aria-hidden="true" tabindex="-1"></a><span class="fu">### The trap: your model stops making sense! </span></span>
+<span id="cb75-233"><a href="#cb75-233" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-236"><a href="#cb75-236" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb75-237"><a href="#cb75-237" aria-hidden="true" tabindex="-1"></a><span class="fu">sqrt</span>(<span class="fu">mean</span>(<span class="fu">residuals</span>(m_logy)<span class="sc">^</span><span class="dv">2</span>)) <span class="co"># looks amazing! </span></span>
+<span id="cb75-238"><a href="#cb75-238" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb75-239"><a href="#cb75-239" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-242"><a href="#cb75-242" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb75-243"><a href="#cb75-243" aria-hidden="true" tabindex="-1"></a><span class="fu">sqrt</span>(<span class="fu">mean</span>(<span class="fu">residuals</span>(m0)<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb75-244"><a href="#cb75-244" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb75-245"><a href="#cb75-245" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-246"><a href="#cb75-246" aria-hidden="true" tabindex="-1"></a>The first number is in $\text{log}$-dollars. The second is in dollars. Comparing them is meaningless.</span>
+<span id="cb75-247"><a href="#cb75-247" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-248"><a href="#cb75-248" aria-hidden="true" tabindex="-1"></a>**Fix:** predict, then <span class="in">`exp()`</span> back to dollars before computing $\text{RMSE}$.</span>
+<span id="cb75-249"><a href="#cb75-249" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-252"><a href="#cb75-252" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb75-253"><a href="#cb75-253" aria-hidden="true" tabindex="-1"></a>model_log <span class="ot">&lt;-</span> model_log <span class="sc">|&gt;</span> </span>
+<span id="cb75-254"><a href="#cb75-254" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_row</span>(<span class="at">model=</span><span class="st">'m2'</span>, <span class="at">added=</span><span class="st">'log(rent) + log(income)'</span>,</span>
+<span id="cb75-255"><a href="#cb75-255" aria-hidden="true" tabindex="-1"></a>          <span class="at">cv_rmse =</span> <span class="fu">cv_rmse</span>(f_logy, tracts, <span class="at">log_outcome=</span><span class="cn">TRUE</span>))</span>
+<span id="cb75-256"><a href="#cb75-256" aria-hidden="true" tabindex="-1"></a>model_log</span>
+<span id="cb75-257"><a href="#cb75-257" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb75-258"><a href="#cb75-258" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-259"><a href="#cb75-259" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 2: Squared terms</span></span>
+<span id="cb75-260"><a href="#cb75-260" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-261"><a href="#cb75-261" aria-hidden="true" tabindex="-1"></a><span class="fu">### When the scatterplot bends </span></span>
+<span id="cb75-262"><a href="#cb75-262" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-265"><a href="#cb75-265" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb75-266"><a href="#cb75-266" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: false</span></span>
+<span id="cb75-267"><a href="#cb75-267" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(tracts, <span class="fu">aes</span>(bldg_age, rent)) <span class="sc">+</span> </span>
+<span id="cb75-268"><a href="#cb75-268" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha=</span><span class="fl">0.4</span>) <span class="sc">+</span> </span>
+<span id="cb75-269"><a href="#cb75-269" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">se=</span><span class="cn">FALSE</span>, <span class="at">color=</span><span class="st">'steelblue'</span>) <span class="sc">+</span> </span>
+<span id="cb75-270"><a href="#cb75-270" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method=</span><span class="st">'lm'</span>, <span class="at">se=</span><span class="cn">FALSE</span>, <span class="at">color=</span><span class="st">'tomato1'</span>) <span class="sc">+</span> </span>
+<span id="cb75-271"><a href="#cb75-271" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x=</span><span class="st">'Median building age (years)'</span>, <span class="at">y=</span><span class="st">'Median rent'</span>) <span class="sc">+</span> </span>
+<span id="cb75-272"><a href="#cb75-272" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_family=</span><span class="st">'jakarta'</span>) </span>
+<span id="cb75-273"><a href="#cb75-273" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb75-274"><a href="#cb75-274" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-275"><a href="#cb75-275" aria-hidden="true" tabindex="-1"></a>If the flexible curve and the straight line disagree, a straight line is leaving information on the table.</span>
+<span id="cb75-276"><a href="#cb75-276" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-277"><a href="#cb75-277" aria-hidden="true" tabindex="-1"></a>Look at the pile-up on the right. The census codes everything built before 1940 as '1939 or earlier', so the building age tops out. That's the data, not a pattern. Check your own variables for walls like this.</span>
+<span id="cb75-278"><a href="#cb75-278" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-279"><a href="#cb75-279" aria-hidden="true" tabindex="-1"></a><span class="fu">### Add a squared term</span></span>
+<span id="cb75-280"><a href="#cb75-280" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-283"><a href="#cb75-283" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb75-284"><a href="#cb75-284" aria-hidden="true" tabindex="-1"></a>f_sq <span class="ot">&lt;-</span> rent <span class="sc">~</span> <span class="fu">log</span>(income) <span class="sc">+</span> pct_renter <span class="sc">+</span> bldg_age <span class="sc">+</span> <span class="fu">I</span>(bldg_age<span class="sc">^</span><span class="dv">2</span>) <span class="sc">+</span> dist_ch_mi</span>
+<span id="cb75-285"><a href="#cb75-285" aria-hidden="true" tabindex="-1"></a>m_sq <span class="ot">&lt;-</span> <span class="fu">lm</span>(f_sq, <span class="at">data=</span>tracts) </span>
+<span id="cb75-286"><a href="#cb75-286" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(m_sq)[<span class="fu">c</span>(<span class="st">'bldg_age'</span>, <span class="st">'I(bldg_age^2)'</span>)]</span>
+<span id="cb75-287"><a href="#cb75-287" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb75-288"><a href="#cb75-288" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-289"><a href="#cb75-289" aria-hidden="true" tabindex="-1"></a><span class="in">`I()`</span> means 'do the math'. Without it, R reads <span class="in">`^`</span> as formula syntax and will ignore what you want.</span>
+<span id="cb75-290"><a href="#cb75-290" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-291"><a href="#cb75-291" aria-hidden="true" tabindex="-1"></a>**Reading it**: you can't read either coefficient alone. The effect of age depends on the age.</span>
+<span id="cb75-292"><a href="#cb75-292" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-293"><a href="#cb75-293" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Linear + squared - -<span class="sc">\&gt;</span> rises, then levels off or falls</span>
+<span id="cb75-294"><a href="#cb75-294" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-295"><a href="#cb75-295" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Linear - squared + -<span class="sc">\&gt;</span> falls, then levels off or rises</span>
+<span id="cb75-296"><a href="#cb75-296" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-297"><a href="#cb75-297" aria-hidden="true" tabindex="-1"></a><span class="fu">### Where does it turn? </span></span>
+<span id="cb75-298"><a href="#cb75-298" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-301"><a href="#cb75-301" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb75-302"><a href="#cb75-302" aria-hidden="true" tabindex="-1"></a>b1 <span class="ot">&lt;-</span> <span class="fu">coef</span>(m_sq)[<span class="st">'bldg_age'</span>]</span>
+<span id="cb75-303"><a href="#cb75-303" aria-hidden="true" tabindex="-1"></a>b2 <span class="ot">&lt;-</span> <span class="fu">coef</span>(m_sq)[<span class="st">'I(bldg_age^2)'</span>]</span>
+<span id="cb75-304"><a href="#cb75-304" aria-hidden="true" tabindex="-1"></a><span class="sc">-</span>b1 <span class="sc">/</span> (<span class="dv">2</span> <span class="sc">*</span> b2) <span class="co"># The turning point</span></span>
+<span id="cb75-305"><a href="#cb75-305" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb75-306"><a href="#cb75-306" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-309"><a href="#cb75-309" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb75-310"><a href="#cb75-310" aria-hidden="true" tabindex="-1"></a><span class="fu">range</span>(tracts<span class="sc">$</span>bldg_age)</span>
+<span id="cb75-311"><a href="#cb75-311" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb75-312"><a href="#cb75-312" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-313"><a href="#cb75-313" aria-hidden="true" tabindex="-1"></a>It's within the range!</span>
+<span id="cb75-314"><a href="#cb75-314" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-315"><a href="#cb75-315" aria-hidden="true" tabindex="-1"></a>If the turning point is outside your data, the curve is just bending, not turning. Don't tell a story about a turn you never observed.</span>
+<span id="cb75-316"><a href="#cb75-316" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-319"><a href="#cb75-319" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb75-320"><a href="#cb75-320" aria-hidden="true" tabindex="-1"></a>model_log <span class="ot">&lt;-</span> model_log <span class="sc">|&gt;</span> </span>
+<span id="cb75-321"><a href="#cb75-321" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_row</span>(<span class="at">model=</span><span class="st">'m3'</span>, <span class="at">added =</span> <span class="st">'+ bldg_age^2'</span>, <span class="at">cv_rmse=</span><span class="fu">cv_rmse</span>(f_sq, tracts))</span>
+<span id="cb75-322"><a href="#cb75-322" aria-hidden="true" tabindex="-1"></a>model_log</span>
+<span id="cb75-323"><a href="#cb75-323" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb75-324"><a href="#cb75-324" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-325"><a href="#cb75-325" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 3: Categorical variables </span></span>
+<span id="cb75-326"><a href="#cb75-326" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-327"><a href="#cb75-327" aria-hidden="true" tabindex="-1"></a><span class="fu">### Two reasons to use categories</span></span>
+<span id="cb75-328"><a href="#cb75-328" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-329"><a href="#cb75-329" aria-hidden="true" tabindex="-1"></a><span class="ss">1.  </span>**The variable already is one**: zoning class, planning district, housing type</span>
+<span id="cb75-330"><a href="#cb75-330" aria-hidden="true" tabindex="-1"></a><span class="ss">2.  </span>**A number behaves like groups:** the relationship jumps instead of sloping smoothly</span>
+<span id="cb75-331"><a href="#cb75-331" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-332"><a href="#cb75-332" aria-hidden="true" tabindex="-1"></a>Make them with <span class="in">`case_when()`</span> or <span class="in">`cut()`</span>, then make sure R treats them as a factor.</span>
+<span id="cb75-333"><a href="#cb75-333" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-334"><a href="#cb75-334" aria-hidden="true" tabindex="-1"></a><span class="fu">### `case_when()` </span></span>
+<span id="cb75-335"><a href="#cb75-335" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-338"><a href="#cb75-338" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb75-339"><a href="#cb75-339" aria-hidden="true" tabindex="-1"></a>tracts <span class="ot">&lt;-</span> tracts <span class="sc">|&gt;</span> </span>
+<span id="cb75-340"><a href="#cb75-340" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb75-341"><a href="#cb75-341" aria-hidden="true" tabindex="-1"></a>    <span class="at">ring =</span> <span class="fu">case_when</span>(</span>
+<span id="cb75-342"><a href="#cb75-342" aria-hidden="true" tabindex="-1"></a>      dist_ch_mi <span class="sc">&lt;</span> <span class="dv">2</span> <span class="sc">~</span> <span class="st">'Core'</span>,</span>
+<span id="cb75-343"><a href="#cb75-343" aria-hidden="true" tabindex="-1"></a>      dist_ch_mi <span class="sc">&lt;</span> <span class="dv">5</span> <span class="sc">~</span> <span class="st">'Inner'</span>, </span>
+<span id="cb75-344"><a href="#cb75-344" aria-hidden="true" tabindex="-1"></a>      <span class="cn">TRUE</span>           <span class="sc">~</span> <span class="st">'Outer'</span></span>
+<span id="cb75-345"><a href="#cb75-345" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb75-346"><a href="#cb75-346" aria-hidden="true" tabindex="-1"></a>    <span class="at">ring =</span> <span class="fu">factor</span>(ring, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">'Core'</span>, <span class="st">'Inner'</span>, <span class="st">'Outer'</span>))</span>
+<span id="cb75-347"><a href="#cb75-347" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb75-348"><a href="#cb75-348" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-349"><a href="#cb75-349" aria-hidden="true" tabindex="-1"></a>tracts <span class="sc">|&gt;</span> <span class="fu">st_drop_geometry</span>() <span class="sc">|&gt;</span> <span class="fu">count</span>(ring)</span>
+<span id="cb75-350"><a href="#cb75-350" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb75-351"><a href="#cb75-351" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-352"><a href="#cb75-352" aria-hidden="true" tabindex="-1"></a><span class="fu">### `cut()` for evenly spaced bins </span></span>
+<span id="cb75-353"><a href="#cb75-353" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-356"><a href="#cb75-356" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb75-357"><a href="#cb75-357" aria-hidden="true" tabindex="-1"></a>tracts <span class="ot">&lt;-</span> tracts <span class="sc">|&gt;</span> </span>
+<span id="cb75-358"><a href="#cb75-358" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">renter_band =</span> <span class="fu">cut</span>(pct_renter, </span>
+<span id="cb75-359"><a href="#cb75-359" aria-hidden="true" tabindex="-1"></a>                           <span class="at">breaks=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">33</span>,<span class="dv">66</span>,<span class="dv">100</span>),</span>
+<span id="cb75-360"><a href="#cb75-360" aria-hidden="true" tabindex="-1"></a>                           <span class="at">labels=</span><span class="fu">c</span>(<span class="st">'Mostly Owners'</span>, <span class="st">'Mixed'</span>, <span class="st">'Mostly Renters'</span>),</span>
+<span id="cb75-361"><a href="#cb75-361" aria-hidden="true" tabindex="-1"></a>                            <span class="at">include.lowest=</span><span class="cn">TRUE</span>))</span>
+<span id="cb75-362"><a href="#cb75-362" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-363"><a href="#cb75-363" aria-hidden="true" tabindex="-1"></a>tracts <span class="sc">|&gt;</span> <span class="fu">st_drop_geometry</span>() <span class="sc">|&gt;</span> <span class="fu">count</span>(renter_band)</span>
+<span id="cb75-364"><a href="#cb75-364" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb75-365"><a href="#cb75-365" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-366"><a href="#cb75-366" aria-hidden="true" tabindex="-1"></a><span class="fu">### What R does behind the scenes </span></span>
+<span id="cb75-367"><a href="#cb75-367" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-370"><a href="#cb75-370" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb75-371"><a href="#cb75-371" aria-hidden="true" tabindex="-1"></a><span class="fu">model.matrix</span>(<span class="sc">~</span> ring, <span class="at">data=</span><span class="fu">st_drop_geometry</span>(tracts)) <span class="sc">|&gt;</span> <span class="fu">head</span>(<span class="dv">8</span>)</span>
+<span id="cb75-372"><a href="#cb75-372" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb75-373"><a href="#cb75-373" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-374"><a href="#cb75-374" aria-hidden="true" tabindex="-1"></a>A factor with $k$ categories becomes $k-1$ dummy variables (0/1) columns. The one left out, **Core**, is the **reference level**. It's absorbed into the intercept.</span>
+<span id="cb75-375"><a href="#cb75-375" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-376"><a href="#cb75-376" aria-hidden="true" tabindex="-1"></a>You never make the dummies yourself. You also never include all $k$. That's what the reference level prevents.</span>
+<span id="cb75-377"><a href="#cb75-377" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-378"><a href="#cb75-378" aria-hidden="true" tabindex="-1"></a><span class="fu">### Reading the coefficients </span></span>
+<span id="cb75-379"><a href="#cb75-379" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-382"><a href="#cb75-382" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb75-383"><a href="#cb75-383" aria-hidden="true" tabindex="-1"></a>f_cat <span class="ot">&lt;-</span> rent <span class="sc">~</span> <span class="fu">log</span>(income) <span class="sc">+</span> pct_renter <span class="sc">+</span> bldg_age <span class="sc">+</span> <span class="fu">I</span>(bldg_age<span class="sc">^</span><span class="dv">2</span>) <span class="sc">+</span> ring</span>
+<span id="cb75-384"><a href="#cb75-384" aria-hidden="true" tabindex="-1"></a>m_cat <span class="ot">&lt;-</span> <span class="fu">lm</span>(f_cat, <span class="at">data=</span>tracts) </span>
+<span id="cb75-385"><a href="#cb75-385" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(m_cat)[<span class="fu">c</span>(<span class="st">'ringInner'</span>, <span class="st">'ringOuter'</span>)]</span>
+<span id="cb75-386"><a href="#cb75-386" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb75-387"><a href="#cb75-387" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-388"><a href="#cb75-388" aria-hidden="true" tabindex="-1"></a>Every category coefficient is a comparison to the reference. <span class="sc">\`</span></span>
+<span id="cb75-389"><a href="#cb75-389" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-390"><a href="#cb75-390" aria-hidden="true" tabindex="-1"></a><span class="in">`ringOuter`</span> is how much higher or lower predicted rent in outer tracts compared to core tracts, holding all other variables constant.</span>
+<span id="cb75-391"><a href="#cb75-391" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-392"><a href="#cb75-392" aria-hidden="true" tabindex="-1"></a><span class="fu">### Change the reference </span></span>
+<span id="cb75-393"><a href="#cb75-393" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-396"><a href="#cb75-396" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb75-397"><a href="#cb75-397" aria-hidden="true" tabindex="-1"></a>tracts_r <span class="ot">&lt;-</span> tracts <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">ring=</span><span class="fu">relevel</span>(ring, <span class="at">ref=</span><span class="st">'Outer'</span>)) </span>
+<span id="cb75-398"><a href="#cb75-398" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(<span class="fu">lm</span>(f_cat, <span class="at">data=</span>tracts_r))[<span class="fu">c</span>(<span class="st">'ringCore'</span>, <span class="st">'ringInner'</span>)]</span>
+<span id="cb75-399"><a href="#cb75-399" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb75-400"><a href="#cb75-400" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-401"><a href="#cb75-401" aria-hidden="true" tabindex="-1"></a>Predictions don't change at all. Only the comparison changes. Pick the reference that makes the sentence you want to write the easiest. Often that's the largest group or a natural baseline.</span>
+<span id="cb75-402"><a href="#cb75-402" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-403"><a href="#cb75-403" aria-hidden="true" tabindex="-1"></a><span class="fu">### The trade: you threw information away </span></span>
+<span id="cb75-404"><a href="#cb75-404" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-405"><a href="#cb75-405" aria-hidden="true" tabindex="-1"></a>We replaced <span class="in">`dist_ch_mi`</span> (a number) with <span class="in">`ring`</span> (three groups). Two tracts at 2.1 and 4.9 miles are now identical, according to the model.</span>
+<span id="cb75-406"><a href="#cb75-406" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-409"><a href="#cb75-409" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb75-410"><a href="#cb75-410" aria-hidden="true" tabindex="-1"></a>model_log <span class="ot">&lt;-</span> model_log <span class="sc">|&gt;</span> </span>
+<span id="cb75-411"><a href="#cb75-411" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_row</span>(<span class="at">model =</span> <span class="st">'m4'</span>, <span class="at">added=</span><span class="st">'ring instead of dist_ch_mi'</span>,</span>
+<span id="cb75-412"><a href="#cb75-412" aria-hidden="true" tabindex="-1"></a>          <span class="at">cv_rmse =</span> <span class="fu">cv_rmse</span>(f_cat, tracts))</span>
+<span id="cb75-413"><a href="#cb75-413" aria-hidden="true" tabindex="-1"></a>model_log</span>
+<span id="cb75-414"><a href="#cb75-414" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb75-415"><a href="#cb75-415" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-416"><a href="#cb75-416" aria-hidden="true" tabindex="-1"></a>Did it help or hurt? Binning helps when the relationship is really jumpy. It hurts when it's smooth. **The model log tells us which**.</span>
+<span id="cb75-417"><a href="#cb75-417" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-418"><a href="#cb75-418" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 4: Interactions </span></span>
+<span id="cb75-419"><a href="#cb75-419" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-420"><a href="#cb75-420" aria-hidden="true" tabindex="-1"></a><span class="fu">### When the slope depends on the group </span></span>
+<span id="cb75-421"><a href="#cb75-421" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-424"><a href="#cb75-424" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb75-425"><a href="#cb75-425" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(tracts, <span class="fu">aes</span>(<span class="fu">log</span>(income), rent, <span class="at">color=</span>ring)) <span class="sc">+</span> </span>
+<span id="cb75-426"><a href="#cb75-426" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha=</span><span class="fl">0.3</span>) <span class="sc">+</span> <span class="fu">geom_smooth</span>(<span class="at">method=</span><span class="st">'lm'</span>, <span class="at">se=</span><span class="cn">FALSE</span>) <span class="sc">+</span> </span>
+<span id="cb75-427"><a href="#cb75-427" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_family=</span><span class="st">'jakarta'</span>) <span class="sc">+</span> <span class="fu">labs</span>(<span class="at">color=</span><span class="st">'Ring'</span>, <span class="at">x=</span><span class="st">'log(Income)'</span>, <span class="at">y=</span><span class="st">'Rent'</span>)</span>
+<span id="cb75-428"><a href="#cb75-428" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb75-429"><a href="#cb75-429" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-430"><a href="#cb75-430" aria-hidden="true" tabindex="-1"></a>Notice how the slopes of these lines are different. This means that the relationship between income and rent is different depending on which category you're in.</span>
+<span id="cb75-431"><a href="#cb75-431" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-432"><a href="#cb75-432" aria-hidden="true" tabindex="-1"></a>If the lines aren't parallel, income "matters" differently in different rings. A plain categorical can only shift the line **up or down**. An interaction lets it **tilt**.</span>
+<span id="cb75-433"><a href="#cb75-433" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-434"><a href="#cb75-434" aria-hidden="true" tabindex="-1"></a><span class="fu">### Fit and read it </span></span>
+<span id="cb75-435"><a href="#cb75-435" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-438"><a href="#cb75-438" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb75-439"><a href="#cb75-439" aria-hidden="true" tabindex="-1"></a>f_int <span class="ot">&lt;-</span> rent <span class="sc">~</span> <span class="fu">log</span>(income) <span class="sc">*</span> ring <span class="sc">+</span> pct_renter <span class="sc">+</span> bldg_age <span class="sc">+</span> <span class="fu">I</span>(bldg_age<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb75-440"><a href="#cb75-440" aria-hidden="true" tabindex="-1"></a>m_int <span class="ot">&lt;-</span> <span class="fu">lm</span>(f_int, <span class="at">data =</span> tracts)</span>
+<span id="cb75-441"><a href="#cb75-441" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(m_int)[<span class="fu">grep</span>(<span class="st">'income'</span>, <span class="fu">names</span>(<span class="fu">coef</span>(m_int)))]</span>
+<span id="cb75-442"><a href="#cb75-442" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb75-443"><a href="#cb75-443" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-444"><a href="#cb75-444" aria-hidden="true" tabindex="-1"></a><span class="in">`a * b`</span> gives you <span class="in">`a, b`</span> and <span class="in">`a:b`</span>.</span>
+<span id="cb75-445"><a href="#cb75-445" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-446"><a href="#cb75-446" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Slope of <span class="in">`log(income)`</span> in <span class="in">`Core`</span> (the reference) = <span class="in">`log(income)`</span></span>
+<span id="cb75-447"><a href="#cb75-447" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-448"><a href="#cb75-448" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Slope in <span class="in">`Outer = log(income) + log(income):ringOuter`</span></span>
+<span id="cb75-449"><a href="#cb75-449" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-452"><a href="#cb75-452" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb75-453"><a href="#cb75-453" aria-hidden="true" tabindex="-1"></a>model_log <span class="ot">&lt;-</span> model_log <span class="sc">|&gt;</span> </span>
+<span id="cb75-454"><a href="#cb75-454" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_row</span>(<span class="at">model =</span> <span class="st">'m5'</span>, <span class="at">added=</span><span class="st">'log(income) x ring'</span>,</span>
+<span id="cb75-455"><a href="#cb75-455" aria-hidden="true" tabindex="-1"></a>          <span class="at">cv_rmse =</span> <span class="fu">cv_rmse</span>(f_int, tracts))</span>
+<span id="cb75-456"><a href="#cb75-456" aria-hidden="true" tabindex="-1"></a>model_log</span>
+<span id="cb75-457"><a href="#cb75-457" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb75-458"><a href="#cb75-458" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-459"><a href="#cb75-459" aria-hidden="true" tabindex="-1"></a>**Use interactions when you have a reason**, not by crossing everything with everything. Each one adds $k-1$ more coefficients to estimate from the same 380-ish tracts.</span>
+<span id="cb75-460"><a href="#cb75-460" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-461"><a href="#cb75-461" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 5: Fixed effects</span></span>
+<span id="cb75-462"><a href="#cb75-462" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-463"><a href="#cb75-463" aria-hidden="true" tabindex="-1"></a><span class="fu">### A categorical variable for *place*</span></span>
+<span id="cb75-464"><a href="#cb75-464" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-465"><a href="#cb75-465" aria-hidden="true" tabindex="-1"></a>A **fixed effect** is a categorical variable for a group of observations, usually a place: one dummy per neighborhood, district, or county.</span>
+<span id="cb75-466"><a href="#cb75-466" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-467"><a href="#cb75-467" aria-hidden="true" tabindex="-1"></a>It soaks up everything constant about that place that you didn't measure: reputation, school catchments, transit, history, the stuff you'd never find in the table.</span>
+<span id="cb75-468"><a href="#cb75-468" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-469"><a href="#cb75-469" aria-hidden="true" tabindex="-1"></a>We'll use Philadelphia's 18 planning districts:</span>
+<span id="cb75-470"><a href="#cb75-470" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-473"><a href="#cb75-473" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb75-474"><a href="#cb75-474" aria-hidden="true" tabindex="-1"></a>districts <span class="ot">&lt;-</span> <span class="fu">st_read</span>(</span>
+<span id="cb75-475"><a href="#cb75-475" aria-hidden="true" tabindex="-1"></a>  <span class="st">"https://services.arcgis.com/fLeGjb7u4uXqeF9q/arcgis/rest/services/Planning_Districts/FeatureServer/0/query?outFields=*&amp;where=1%3D1&amp;f=geojson"</span>,</span>
+<span id="cb75-476"><a href="#cb75-476" aria-hidden="true" tabindex="-1"></a>  <span class="at">quiet=</span><span class="cn">TRUE</span></span>
+<span id="cb75-477"><a href="#cb75-477" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span> <span class="fu">st_transform</span>(<span class="dv">2272</span>)</span>
+<span id="cb75-478"><a href="#cb75-478" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-479"><a href="#cb75-479" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(districts)</span>
+<span id="cb75-480"><a href="#cb75-480" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb75-481"><a href="#cb75-481" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-484"><a href="#cb75-484" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb75-485"><a href="#cb75-485" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: false </span></span>
+<span id="cb75-486"><a href="#cb75-486" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-487"><a href="#cb75-487" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(RColorBrewer)</span>
+<span id="cb75-488"><a href="#cb75-488" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(paletteer)</span>
+<span id="cb75-489"><a href="#cb75-489" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-490"><a href="#cb75-490" aria-hidden="true" tabindex="-1"></a><span class="co"># n &lt;- length(unique(districts$dist_name))</span></span>
+<span id="cb75-491"><a href="#cb75-491" aria-hidden="true" tabindex="-1"></a><span class="co"># pal &lt;- colorRampPalette(brewer.pal(12, "Set3"))(n)</span></span>
+<span id="cb75-492"><a href="#cb75-492" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-493"><a href="#cb75-493" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb75-494"><a href="#cb75-494" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_sf</span>(<span class="at">data=</span>districts, <span class="fu">aes</span>(<span class="at">fill=</span>dist_name), <span class="at">color=</span><span class="st">'white'</span>, <span class="at">linewidth=</span><span class="dv">1</span>) <span class="sc">+</span> </span>
+<span id="cb75-495"><a href="#cb75-495" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_sf</span>(<span class="at">data=</span>tracts, <span class="at">fill=</span><span class="cn">NA</span>, <span class="at">color=</span><span class="st">'white'</span>) <span class="sc">+</span></span>
+<span id="cb75-496"><a href="#cb75-496" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_void</span>(<span class="at">base_family=</span><span class="st">'jakarta'</span>) <span class="sc">+</span> </span>
+<span id="cb75-497"><a href="#cb75-497" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">paletteer_d</span>(<span class="st">"ggsci::default_igv"</span>)) <span class="sc">+</span></span>
+<span id="cb75-498"><a href="#cb75-498" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title=</span><span class="st">'Districts and Tracts of Philadelphia'</span>) <span class="sc">+</span> </span>
+<span id="cb75-499"><a href="#cb75-499" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position=</span><span class="st">'none'</span>)</span>
+<span id="cb75-500"><a href="#cb75-500" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb75-501"><a href="#cb75-501" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-502"><a href="#cb75-502" aria-hidden="true" tabindex="-1"></a><span class="fu">### Assign each tract to a district </span></span>
+<span id="cb75-503"><a href="#cb75-503" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-506"><a href="#cb75-506" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb75-507"><a href="#cb75-507" aria-hidden="true" tabindex="-1"></a>tracts <span class="ot">&lt;-</span> tracts <span class="sc">|&gt;</span> </span>
+<span id="cb75-508"><a href="#cb75-508" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_join</span>(districts <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="at">district=</span>dist_name), <span class="at">largest=</span><span class="cn">TRUE</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb75-509"><a href="#cb75-509" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">district=</span><span class="fu">factor</span>(district)) </span>
+<span id="cb75-510"><a href="#cb75-510" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-511"><a href="#cb75-511" aria-hidden="true" tabindex="-1"></a>tracts <span class="sc">|&gt;</span> <span class="fu">st_drop_geometry</span>() <span class="sc">|&gt;</span> <span class="fu">count</span>(district, <span class="at">sort=</span><span class="cn">TRUE</span>)</span>
+<span id="cb75-512"><a href="#cb75-512" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb75-513"><a href="#cb75-513" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-514"><a href="#cb75-514" aria-hidden="true" tabindex="-1"></a><span class="in">`largest = TRUE`</span> means that if a tract straddles a boundary, it goes to whatever has most of its area. One tract, one district.</span>
+<span id="cb75-515"><a href="#cb75-515" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-516"><a href="#cb75-516" aria-hidden="true" tabindex="-1"></a><span class="fu">### Numbers that are really labels </span></span>
+<span id="cb75-517"><a href="#cb75-517" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-518"><a href="#cb75-518" aria-hidden="true" tabindex="-1"></a>If districts came coded 1-18, this would run without complaint:</span>
+<span id="cb75-519"><a href="#cb75-519" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-522"><a href="#cb75-522" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb75-523"><a href="#cb75-523" aria-hidden="true" tabindex="-1"></a>tracts <span class="ot">&lt;-</span> tracts <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">district_num =</span> <span class="fu">as.numeric</span>(district)) </span>
+<span id="cb75-524"><a href="#cb75-524" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(<span class="fu">lm</span>(rent <span class="sc">~</span> district_num, <span class="at">data=</span>tracts))</span>
+<span id="cb75-525"><a href="#cb75-525" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb75-526"><a href="#cb75-526" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-527"><a href="#cb75-527" aria-hidden="true" tabindex="-1"></a><span class="fu">### Add the fixed effect </span></span>
+<span id="cb75-528"><a href="#cb75-528" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-531"><a href="#cb75-531" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb75-532"><a href="#cb75-532" aria-hidden="true" tabindex="-1"></a>f_fe <span class="ot">&lt;-</span> rent <span class="sc">~</span> <span class="fu">log</span>(income) <span class="sc">+</span> pct_renter <span class="sc">+</span>  bldg_age <span class="sc">+</span> <span class="fu">I</span>(bldg_age<span class="sc">^</span><span class="dv">2</span>) <span class="sc">+</span> district</span>
+<span id="cb75-533"><a href="#cb75-533" aria-hidden="true" tabindex="-1"></a>m_fe <span class="ot">&lt;-</span> <span class="fu">lm</span>(f_fe, <span class="at">data=</span>tracts) </span>
+<span id="cb75-534"><a href="#cb75-534" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-535"><a href="#cb75-535" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(m_sq)[<span class="st">'log(income)'</span>] <span class="co"># before</span></span>
+<span id="cb75-536"><a href="#cb75-536" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb75-537"><a href="#cb75-537" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-540"><a href="#cb75-540" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb75-541"><a href="#cb75-541" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(m_fe)[<span class="st">'log(income)'</span>] <span class="co"># after</span></span>
+<span id="cb75-542"><a href="#cb75-542" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb75-543"><a href="#cb75-543" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-544"><a href="#cb75-544" aria-hidden="true" tabindex="-1"></a>**Why did the income coefficient change?** Before, it compared tracts across the whole city. Now it compares tracts **within the same district**. Some of what looked liked 'income' was really 'being in a district where everything is more expensive'.</span>
+<span id="cb75-545"><a href="#cb75-545" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-546"><a href="#cb75-546" aria-hidden="true" tabindex="-1"></a>That's a $\hat{\beta}$ story. For $\hat{y}$, the question is just: **did it predict better**?</span>
+<span id="cb75-547"><a href="#cb75-547" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-548"><a href="#cb75-548" aria-hidden="true" tabindex="-1"></a><span class="fu">### Each district's intercept </span></span>
+<span id="cb75-549"><a href="#cb75-549" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-552"><a href="#cb75-552" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb75-553"><a href="#cb75-553" aria-hidden="true" tabindex="-1"></a>fe_coefs <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">term=</span><span class="fu">names</span>(<span class="fu">coef</span>(m_fe)), <span class="at">est=</span><span class="fu">coef</span>(m_fe)) <span class="sc">|&gt;</span> </span>
+<span id="cb75-554"><a href="#cb75-554" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">str_starts</span>(term, <span class="st">'district'</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb75-555"><a href="#cb75-555" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">term=</span><span class="fu">str_remove</span>(term, <span class="st">'district'</span>)) </span>
+<span id="cb75-556"><a href="#cb75-556" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb75-557"><a href="#cb75-557" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-560"><a href="#cb75-560" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb75-561"><a href="#cb75-561" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(fe_coefs, <span class="fu">aes</span>(est, <span class="fu">reorder</span>(term,est))) <span class="sc">+</span> </span>
+<span id="cb75-562"><a href="#cb75-562" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>() <span class="sc">+</span> </span>
+<span id="cb75-563"><a href="#cb75-563" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x=</span><span class="fu">paste</span>(<span class="st">'Rent difference vs.'</span>, <span class="fu">levels</span>(tracts<span class="sc">$</span>district)[<span class="dv">1</span>], <span class="st">'(the reference)'</span>),</span>
+<span id="cb75-564"><a href="#cb75-564" aria-hidden="true" tabindex="-1"></a>       <span class="at">y=</span><span class="cn">NULL</span>) <span class="sc">+</span> </span>
+<span id="cb75-565"><a href="#cb75-565" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_family=</span><span class="st">'jakarta'</span>)</span>
+<span id="cb75-566"><a href="#cb75-566" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb75-567"><a href="#cb75-567" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-568"><a href="#cb75-568" aria-hidden="true" tabindex="-1"></a>This is the "price of being there", after income, tenure, and age. It tells you **where**, not **why**.</span>
+<span id="cb75-569"><a href="#cb75-569" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-570"><a href="#cb75-570" aria-hidden="true" tabindex="-1"></a><span class="fu">### Did it absorb the clusters? </span></span>
+<span id="cb75-571"><a href="#cb75-571" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-574"><a href="#cb75-574" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb75-575"><a href="#cb75-575" aria-hidden="true" tabindex="-1"></a>tracts <span class="ot">&lt;-</span> tracts <span class="sc">|&gt;</span> </span>
+<span id="cb75-576"><a href="#cb75-576" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">resid_before =</span> <span class="fu">residuals</span>(m_sq),</span>
+<span id="cb75-577"><a href="#cb75-577" aria-hidden="true" tabindex="-1"></a>         <span class="at">resid_fe =</span> <span class="fu">residuals</span>(m_fe))</span>
+<span id="cb75-578"><a href="#cb75-578" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb75-579"><a href="#cb75-579" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-582"><a href="#cb75-582" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb75-583"><a href="#cb75-583" aria-hidden="true" tabindex="-1"></a>map_resid <span class="ot">&lt;-</span> <span class="cf">function</span>(var, title) {</span>
+<span id="cb75-584"><a href="#cb75-584" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(tracts) <span class="sc">+</span> </span>
+<span id="cb75-585"><a href="#cb75-585" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_sf</span>(<span class="fu">aes</span>(<span class="at">fill=</span>.data[[var]]), <span class="at">color=</span><span class="cn">NA</span>) <span class="sc">+</span> </span>
+<span id="cb75-586"><a href="#cb75-586" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_fill_gradient2</span>(<span class="at">low=</span><span class="st">'#2166ac'</span>, <span class="at">mid=</span><span class="st">'grey95'</span>, <span class="at">high=</span><span class="st">'#b2182b'</span>, <span class="at">midpoint=</span><span class="dv">0</span>, <span class="at">limits =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">900</span>, <span class="dv">900</span>), <span class="at">oob=</span>scales<span class="sc">::</span>squish) <span class="sc">+</span> </span>
+<span id="cb75-587"><a href="#cb75-587" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">title=</span>title, <span class="at">fill=</span><span class="st">'Residual'</span>) <span class="sc">+</span> <span class="fu">theme_void</span>(<span class="at">base_family=</span><span class="st">'jakarta'</span>)</span>
+<span id="cb75-588"><a href="#cb75-588" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb75-589"><a href="#cb75-589" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-590"><a href="#cb75-590" aria-hidden="true" tabindex="-1"></a><span class="fu">map_resid</span>(<span class="st">'resid_before'</span>, <span class="st">'Without district FE'</span>) <span class="sc">+</span> <span class="fu">map_resid</span>(<span class="st">'resid_fe'</span>, <span class="st">'With district FE'</span>)</span>
+<span id="cb75-591"><a href="#cb75-591" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb75-592"><a href="#cb75-592" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-593"><a href="#cb75-593" aria-hidden="true" tabindex="-1"></a><span class="fu">### Into the model log </span></span>
+<span id="cb75-594"><a href="#cb75-594" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-595"><a href="#cb75-595" aria-hidden="true" tabindex="-1"></a>The code below merges some small tracts together (we did this because we have very small observations in some)</span>
+<span id="cb75-596"><a href="#cb75-596" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-599"><a href="#cb75-599" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb75-600"><a href="#cb75-600" aria-hidden="true" tabindex="-1"></a>small <span class="ot">&lt;-</span> tracts <span class="sc">%&gt;%</span> <span class="fu">st_drop_geometry</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb75-601"><a href="#cb75-601" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(district) <span class="sc">%&gt;%</span> <span class="fu">filter</span>(n <span class="sc">&lt;</span> <span class="dv">10</span> <span class="sc">|</span> <span class="fu">is.na</span>(district)) <span class="sc">%&gt;%</span> <span class="fu">pull</span>(district)</span>
+<span id="cb75-602"><a href="#cb75-602" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-603"><a href="#cb75-603" aria-hidden="true" tabindex="-1"></a>is_small <span class="ot">&lt;-</span> tracts<span class="sc">$</span>district <span class="sc">%in%</span> small <span class="sc">|</span> <span class="fu">is.na</span>(tracts<span class="sc">$</span>district)</span>
+<span id="cb75-604"><a href="#cb75-604" aria-hidden="true" tabindex="-1"></a>nearest  <span class="ot">&lt;-</span> <span class="fu">st_nearest_feature</span>(tracts[is_small, ], tracts[<span class="sc">!</span>is_small, ])</span>
+<span id="cb75-605"><a href="#cb75-605" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-606"><a href="#cb75-606" aria-hidden="true" tabindex="-1"></a>tracts <span class="ot">&lt;-</span> tracts <span class="sc">%&gt;%</span></span>
+<span id="cb75-607"><a href="#cb75-607" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">district_cv =</span> <span class="fu">as.character</span>(district))</span>
+<span id="cb75-608"><a href="#cb75-608" aria-hidden="true" tabindex="-1"></a>tracts<span class="sc">$</span>district_cv[is_small] <span class="ot">&lt;-</span> <span class="fu">as.character</span>(tracts<span class="sc">$</span>district[<span class="sc">!</span>is_small][nearest])</span>
+<span id="cb75-609"><a href="#cb75-609" aria-hidden="true" tabindex="-1"></a>tracts <span class="ot">&lt;-</span> tracts <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">district_cv =</span> <span class="fu">factor</span>(district_cv))</span>
+<span id="cb75-610"><a href="#cb75-610" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-611"><a href="#cb75-611" aria-hidden="true" tabindex="-1"></a>tracts <span class="sc">%&gt;%</span> <span class="fu">st_drop_geometry</span>() <span class="sc">%&gt;%</span> <span class="fu">count</span>(district_cv) <span class="sc">%&gt;%</span> <span class="fu">arrange</span>(n) <span class="sc">%&gt;%</span> <span class="fu">head</span>(<span class="dv">5</span>)</span>
+<span id="cb75-612"><a href="#cb75-612" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb75-613"><a href="#cb75-613" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-616"><a href="#cb75-616" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb75-617"><a href="#cb75-617" aria-hidden="true" tabindex="-1"></a>f_fe_cv <span class="ot">&lt;-</span> rent <span class="sc">~</span> <span class="fu">log</span>(income) <span class="sc">+</span> pct_renter <span class="sc">+</span> bldg_age <span class="sc">+</span> <span class="fu">I</span>(bldg_age<span class="sc">^</span><span class="dv">2</span>) <span class="sc">+</span> district_cv</span>
+<span id="cb75-618"><a href="#cb75-618" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-619"><a href="#cb75-619" aria-hidden="true" tabindex="-1"></a>model_log <span class="ot">&lt;-</span> model_log <span class="sc">|&gt;</span> </span>
+<span id="cb75-620"><a href="#cb75-620" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_row</span>(<span class="at">model=</span><span class="st">'m6'</span>, <span class="at">added=</span><span class="st">'+ district FE (small ones merged with neighbors)'</span>, <span class="at">cv_rmse =</span> <span class="fu">cv_rmse</span>(f_fe_cv, tracts))</span>
+<span id="cb75-621"><a href="#cb75-621" aria-hidden="true" tabindex="-1"></a>model_log</span>
+<span id="cb75-622"><a href="#cb75-622" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb75-623"><a href="#cb75-623" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-624"><a href="#cb75-624" aria-hidden="true" tabindex="-1"></a><span class="fu">### Check group sizes first, every time </span></span>
+<span id="cb75-625"><a href="#cb75-625" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-628"><a href="#cb75-628" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb75-629"><a href="#cb75-629" aria-hidden="true" tabindex="-1"></a>tracts <span class="sc">|&gt;</span> <span class="fu">st_drop_geometry</span>() <span class="sc">|&gt;</span> <span class="fu">count</span>(district) <span class="sc">|&gt;</span> <span class="fu">arrange</span>(n) <span class="sc">|&gt;</span> <span class="fu">head</span>(<span class="dv">5</span>)</span>
+<span id="cb75-630"><a href="#cb75-630" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb75-631"><a href="#cb75-631" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-632"><a href="#cb75-632" aria-hidden="true" tabindex="-1"></a>Rule of thumb: **at least \~10 observations per group for 10-fold CV, more is safer.**</span>
+<span id="cb75-633"><a href="#cb75-633" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-634"><a href="#cb75-634" aria-hidden="true" tabindex="-1"></a>If a group is too small:</span>
+<span id="cb75-635"><a href="#cb75-635" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-636"><a href="#cb75-636" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Merge it with a neighbor** that makes sense geographically or substantively (best)</span>
+<span id="cb75-637"><a href="#cb75-637" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-638"><a href="#cb75-638" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Lump small groups into "other" with <span class="in">`fct_lump_min(district, min=10)`</span> (quick, but "Other" may be a nonsense group of cities scattered across the city</span>
+<span id="cb75-639"><a href="#cb75-639" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-640"><a href="#cb75-640" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Use a coarser geography</span>
+<span id="cb75-641"><a href="#cb75-641" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-642"><a href="#cb75-642" aria-hidden="true" tabindex="-1"></a><span class="fu">## 6. Putting it all together </span></span>
+<span id="cb75-643"><a href="#cb75-643" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-644"><a href="#cb75-644" aria-hidden="true" tabindex="-1"></a><span class="fu">### What the log says </span></span>
+<span id="cb75-645"><a href="#cb75-645" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-648"><a href="#cb75-648" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb75-649"><a href="#cb75-649" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(model_log, <span class="fu">aes</span>(cv_rmse, <span class="fu">fct_inorder</span>(<span class="fu">paste</span>(model, added)))) <span class="sc">+</span></span>
+<span id="cb75-650"><a href="#cb75-650" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">3</span>, <span class="fu">aes</span>(<span class="at">color =</span> cv_rmse)) <span class="sc">+</span></span>
+<span id="cb75-651"><a href="#cb75-651" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">'CV RMSE ($)'</span>, <span class="at">y =</span> <span class="cn">NULL</span>, <span class="at">color =</span> <span class="st">'CV RMSE ($)'</span>) <span class="sc">+</span></span>
+<span id="cb75-652"><a href="#cb75-652" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_distiller</span>(<span class="at">palette =</span> <span class="st">'YlOrRd'</span>, <span class="at">direction =</span> <span class="sc">-</span><span class="dv">1</span>, <span class="at">guide =</span> <span class="fu">guide_colorbar</span>(<span class="at">reverse =</span> <span class="cn">TRUE</span>)) <span class="sc">+</span></span>
+<span id="cb75-653"><a href="#cb75-653" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_family =</span> <span class="st">'jakarta'</span>)</span>
+<span id="cb75-654"><a href="#cb75-654" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb75-655"><a href="#cb75-655" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-656"><a href="#cb75-656" aria-hidden="true" tabindex="-1"></a>Some moves help, some don't, some hurt. That's the finding. You wouldn't know without the same folds and the same rows.</span>
+</code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

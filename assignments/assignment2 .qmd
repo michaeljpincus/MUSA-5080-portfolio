@@ -20,6 +20,9 @@ editor:
 ```{r}
 library(tidyverse)
 library(tidycensus)
+library(showtext)
+font_add_google("Plus Jakarta Sans", "jakarta")
+showtext_auto()
 ```
 
 ## The question
@@ -195,13 +198,13 @@ reliability_map <- ggplot(planning_regions) +
                                "Low confidence" = "#fce4de"),
                     breaks = c("High confidence", "Moderate", "Low confidence")) + 
   labs(title='Reliability of Census Estimates', fill=NULL) +
-  theme_void()
+  theme_void(base_family = 'jakarta')
 
 pop_map <- ggplot(planning_regions) +
   geom_sf(aes(fill = popE), color = 'white') +
   scale_fill_distiller(palette = "Reds", direction = 1) +
   labs(title='Population', fill=NULL) + 
-  theme_void()
+  theme_void(base_family = 'jakarta')
 
 reliability_map + pop_map
 ```
