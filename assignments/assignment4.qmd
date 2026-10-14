@@ -1,0 +1,476 @@
+---
+title: "Assignment: Building Features, Watching What Happens"
+date: 10-14-2026
+description: "Constructing a model using ACS data" 
+author: "Michael Pincus"
+format:
+  html:
+    toc: true
+    code-fold: show
+    code-tools: true
+execute:
+  warning: false
+  message: false
+freeze: false
+---
+
+## Part 0: Setup
+
+```{r}
+#| label: setup
+library(tidyverse)
+library(tidycensus)
+library(sf)
+library(caret)
+library(showtext)
+font_add_google('Plus Jakarta Sans', 'jakarta')
+showtext_auto()
+theme_set(theme_minimal(base_family = "jakarta"))
+
+Sys.getenv("CENSUS_API_KEY") != ""   # should print TRUE
+```
+
+### The cross-validation helper
+
+```{r}
+#| label: cv-helper
+ctrl <- trainControl(method = "cv", number = 10)
+
+cv_rmse <- function(formula, data) {
+  df <- if (inherits(data, "sf")) st_drop_geometry(data) else data
+  vars <- all.vars(formula)
+  bad <- vars[sapply(vars, function(v) any(is.na(df[[v]])))]
+  if (length(bad) > 0) {
+    stop("These variables have NAs: ", paste(bad, collapse = ", "),
+         ". Fill them or choose another variable (Rule 1: don't drop rows).")
+  }
+  set.seed(5080)
+  fit <- train(formula, data = df, method = "lm", trControl = ctrl)
+  fit$results$RMSE
+}
+```
+
+### The model log
+
+```{r}
+#| label: log-start
+model_log <- tibble(
+  model   = character(),
+  added   = character(),
+  cv_rmse = numeric(),
+  notes   = character()
+)
+```
+
+------------------------------------------------------------------------
+
+## Part 1: Choose your outcome
+
+### 1A: Pull your outcome and your baseline predictors
+
+```{r}
+#| label: pull
+#| output: false
+philly_tracts <- get_acs(
+  geography = "tract",
+  state = "PA",
+  county = "Philadelphia",
+  variables = c(
+    total_pop = "B01003_001",
+    # your outcome's numerator and denominator (or median), e.g.:
+    total_hh = "B08201_001",
+    no_veh = "B08201_002",
+    # your baseline predictors, e.g.:
+    pctbelpov = 'B17001_001',
+    total_occ = 'B25003_001', owners = 'B25003_002', renters = 'B25003_003',
+    tt_work = "B08303_001", tt45 = "B08303_011", tt60 = "B08303_012", tt90 = "B08303_013"
+    
+  ),
+  year = 2023,
+  output = "wide",
+  geometry = TRUE
+) %>%
+  st_transform(2272)
+```
+
+```{r}
+#| label: build-outcome
+philly_tracts <- philly_tracts %>%
+  mutate(
+    # Dependent variable: % with no vehicle
+    y     = no_vehE / total_hhE * 100,
+    y_moe = tidycensus::moe_prop(no_vehE, total_hhE, no_vehM, total_hhM) * 100,
+    y_cv  = (y_moe / 1.645) / y * 100,
+    
+    # Predictors
+    pct_rentersE = rentersE / total_occE * 100,
+    pct_rentersM = tidycensus::moe_prop(rentersE, total_occE, rentersM, total_occM) * 100,
+    
+    tt60plusE = tt60E + tt90E,
+    tt60plusM = sqrt(tt60M^2 + tt90M^2),
+    pct60ttE  = tt60plusE / tt_workE * 100,
+    pct60ttM  = tidycensus::moe_prop(tt60plusE, tt_workE, tt60plusM, tt_workM) * 100
+  )
+```
+
+### 1B: Is it reliable enough to model?
+
+```{r}
+#| label: reliability
+# How many tracts have no value for your outcome?
+sum(is.na(philly_tracts$y))
+
+# How reliable is it?
+summary(philly_tracts$y_cv)
+
+philly_tracts %>%
+  mutate(reliability = case_when(
+    y_cv < 12  ~ "High",
+    y_cv <= 40 ~ "Moderate",
+    TRUE       ~ "Low"
+  )) %>%
+  st_drop_geometry() %>%
+  count(reliability)
+
+# What does the distribution look like?
+ggplot(philly_tracts, aes(x = y)) +
+  geom_histogram(bins = 30) +
+  theme_minimal(base_family = 'jakarta')
+```
+
+My outcome is percent of households with no vehicles. An agency would want to predict this if it were working to expand transit access in neighborhoods who need it most. Less than 1/3 of tracts have unreliable estimates, so the analysis will proceed.
+
+My current predictors (features) include `pct60ttE`, `pct_rentersE`, and `medhhinc`.
+
+### 1C: Decide which tracts to model
+
+```{r}
+#| label: filter
+tracts <- philly_tracts %>%
+  filter(total_popE > 0,
+         !is.na(y)
+         # add !is.na() for each baseline predictor like in the in-class lab
+         )
+
+nrow(philly_tracts)
+nrow(tracts)
+```
+
+About 20 tracts were lost, which consist of parks and industrial areas.
+
+------------------------------------------------------------------------
+
+## Part 2: Baseline model
+
+### 2A: Look first
+
+```{r}
+#| label: look
+library(patchwork)
+s1 <- ggplot(tracts, aes(x=pctbelpovE, y=y)) + geom_point(alpha=0.5) + 
+  geom_smooth(method='lm', se=FALSE, color='tomato1') + theme_minimal(base_family = 'jakarta')
+
+s2 <- ggplot(tracts, aes(x=pct60ttE, y=y)) + geom_point(alpha=0.5) + 
+  geom_smooth(method='lm', se=FALSE, color='tomato1') + theme_minimal(base_family = 'jakarta') 
+
+s3 <- ggplot(tracts, aes(x=pct_rentersE, y=y)) + geom_point(alpha=0.5) + 
+  geom_smooth(method='lm', se=FALSE, color='tomato1') + theme_minimal(base_family = 'jakarta')
+
+s1 + s2 / s3
+```
+
+### 2B: Fit and log
+
+```{r}
+#| label: m1
+f1 <- y ~ pctbelpovE + pct60ttE + pct_rentersE
+
+m1 <- lm(f1, data = tracts)
+summary(m1)
+
+model_log <- model_log %>%
+  add_row(model = "m1", added = "ACS baseline",
+          cv_rmse = cv_rmse(f1, tracts),
+          notes = "No transformations, absolute baseline")
+
+model_log
+```
+
+On tracts it hasn't seen, the baseline model misses by about 13%.
+
+### 2C: Where is the baseline wrong?
+
+Save this map. You'll compare it to your final model's map in Part 6.
+
+```{r}
+#| label: resid-map-1
+tracts <- tracts %>% mutate(resid_m1 = residuals(m1))
+
+bm <- ggplot(tracts) +
+  geom_sf(aes(fill = resid_m1), color = NA) +
+  scale_fill_gradient2(low = "#2166ac", mid = "grey95", high = "#b2182b", midpoint = 0) +
+  theme_void(base_family='jakarta') +
+  labs(title = "Baseline model: where it's wrong",
+       subtitle = "Red = actual higher than predicted",
+       fill = "Residual")
+
+bm
+```
+
+There are large clusters of residuals in the baseline model. It underpredicts in the northeast and northwest corners of Philadelphia, and overpredicts in north Philadelphia.
+
+------------------------------------------------------------------------
+
+## Part 3: Getting data from Philadelphia's open data portal
+
+```{r}
+#| label: my-layers
+transit_stops <- st_read('assignments/data/Transit_Stops_(Fall_2026).geojson'
+) %>%
+  st_transform(st_crs(tracts))
+
+indego_stops <- st_read('https://www.rideindego.com/stations/json') %>%
+  st_transform(st_crs(tracts))
+```
+
+`transit_stops` include all SEPTA stops, including bus, trolley, and rail. `indego_stops` include all Indego bikeshare stations within the city of Philadelphia. I expect these to capture more than my ACS variables, as spatial access to transit is not quantified in the survey.
+
+------------------------------------------------------------------------
+
+## Part 4: Building spatial features
+
+```{r}
+schools <- st_read('assignments/data/Schools.geojson') %>% st_transform(st_crs(tracts))
+```
+
+```{r}
+#| label: my-spatial
+
+tracts <- tracts %>%
+  mutate(
+    area_sqmi         = as.numeric(st_area(.)) / 27878400)
+
+tract_pts <- st_point_on_surface(tracts) 
+
+#================== 1. Indego counts and densities 
+tracts <- tracts %>%
+  mutate(n_indego = lengths(st_intersects(., indego_stops)))
+
+tracts <- tracts %>%
+  mutate(indego_per_sqmi = n_indego / area_sqmi)
+
+summary(tracts$n_indego)
+
+f2 <- y ~ pctbelpovE + pct60ttE + pct_rentersE + indego_per_sqmi 
+
+model_log <- model_log %>%
+  add_row(model = "m2", added = "indego_per_sqmi",
+          cv_rmse = cv_rmse(f2, tracts),
+          notes = "___")
+
+model_log
+
+#=================== 2. Distance to nearest SEPTA station 
+nearest_idx <- st_nearest_feature(tract_pts, transit_stops)
+
+tracts <- tracts %>%
+  mutate(dist_septa_mi = as.numeric(
+    st_distance(tract_pts, transit_stops[nearest_idx, ], by_element = TRUE)) / 5280)
+
+
+f3 <- y ~ pctbelpovE + pct60ttE + pct_rentersE + indego_per_sqmi + dist_septa_mi
+
+model_log <- model_log %>%
+  add_row(model = "m3", added = "dist_septa_mi",
+          cv_rmse = cv_rmse(f3, tracts),
+          notes = "___")
+
+model_log
+
+#==================== 3. Distance to nearest school 
+
+nearest_idx_school <- st_nearest_feature(tract_pts, schools)
+
+tracts <- tracts %>%
+  mutate(dist_school_mi = as.numeric(
+    st_distance(tract_pts, schools[nearest_idx_school, ], by_element = TRUE)) / 5280)
+
+
+f4 <- y ~ pctbelpovE + pct60ttE + pct_rentersE + indego_per_sqmi + dist_septa_mi + dist_school_mi
+
+model_log <- model_log %>%
+  add_row(model = "m4", added = "dist_school_mi",
+          cv_rmse = cv_rmse(f4, tracts),
+          notes = "___")
+
+model_log
+
+```
+
+All three spatial features helped the model, with distance to nearest SEPTA stop helping the most.
+
+------------------------------------------------------------------------
+
+### $\text{log}$ Transformations
+
+```{r}
+# Exploring the distributions of data
+h1 <- ggplot(tracts, aes(x = pctbelpovE)) + geom_histogram(bins = 30, fill='darkseagreen') 
+h2 <- ggplot(tracts, aes(x = pct60ttE)) + geom_histogram(bins = 30, fill='darkseagreen') 
+h3 <- ggplot(tracts, aes(x = pct_rentersE)) + geom_histogram(bins = 30, fill='darkseagreen') 
+h4 <- ggplot(tracts, aes(x = indego_per_sqmi)) + geom_histogram(bins = 30, fill='darkseagreen') 
+h5 <- ggplot(tracts, aes(x = dist_septa_mi)) + geom_histogram(bins = 30, fill='darkseagreen') 
+h6 <- ggplot(tracts, aes(x = dist_school_mi)) + geom_histogram(bins = 30, fill='darkseagreen') 
+
+h1 + h2 + h3 + h4 + h5 + h6 
+```
+
+```{r}
+any(tracts$pctbelpovE == 0)
+any(tracts$pct60ttE == 0) # True 
+any(tracts$pct_rentersE == 0) # True 
+any(tracts$indego_per_sqmi == 0) # True 
+any(tracts$dist_septa_mi == 0)
+any(tracts$dist_school_mi == 0)
+```
+
+```{r}
+h7 <- ggplot(tracts, aes(x = log(pctbelpovE))) + geom_histogram(bins = 30, fill='darkseagreen') 
+h8 <- ggplot(tracts, aes(x = log1p(pct60ttE))) + geom_histogram(bins = 30, fill='darkseagreen') 
+h9 <- ggplot(tracts, aes(x = log1p(pct_rentersE))) + geom_histogram(bins = 30, fill='darkseagreen') 
+h10 <- ggplot(tracts, aes(x = log1p(indego_per_sqmi))) + geom_histogram(bins = 30, fill='darkseagreen') 
+h11 <- ggplot(tracts, aes(x = log(dist_septa_mi))) + geom_histogram(bins = 30, fill='darkseagreen') 
+h12 <- ggplot(tracts, aes(x = log(dist_school_mi))) + geom_histogram(bins = 30, fill='darkseagreen') 
+
+h7 + h8 + h9 + h10 + h11 + h12 
+```
+
+### Squared Terms
+
+```{r}
+sp1 <- ggplot(tracts, aes(x=pctbelpovE, y=y)) + geom_point(alpha=0.4) + geom_smooth(method = "lm", formula = y ~ x + I(x^2), se = FALSE, color = "tomato1") 
+
+sp2 <- ggplot(tracts, aes(x=pct60ttE, y=y)) + geom_point(alpha=0.4) + geom_smooth(method = "lm", formula = y ~ x + I(x^2), se = FALSE, color = "tomato1")
+
+sp3 <- ggplot(tracts, aes(x=pct_rentersE, y=y)) + geom_point(alpha=0.4) + geom_smooth(method = "lm", formula = y ~ x + I(x^2), se = FALSE, color = "tomato1")
+
+sp4 <- ggplot(tracts, aes(x=indego_per_sqmi, y=y)) + geom_point(alpha=0.4) + geom_smooth(method = "lm", formula = y ~ x + I(x^2), se = FALSE, color = "tomato1")
+
+sp5 <- ggplot(tracts, aes(x=dist_septa_mi, y=y)) + geom_point(alpha=0.4) + geom_smooth(method = "lm", formula = y ~ x + I(x^2), se = FALSE, color = "tomato1")
+
+sp6 <- ggplot(tracts, aes(x=dist_school_mi, y=y)) + geom_point(alpha=0.4) + geom_smooth(method = "lm", formula = y ~ x + I(x^2), se = FALSE, color = "tomato1")
+
+sp1 + sp2 + sp3 + sp4 + sp5 + sp6 
+```
+
+```{r}
+#| label: my-transforms
+f_log <- y ~ pctbelpovE + pct60ttE + pct_rentersE + indego_per_sqmi + log(dist_septa_mi) + dist_school_mi
+
+model_log <- model_log %>%
+  add_row(model = "m5", added = "log of dist_septa_mi",
+          cv_rmse = cv_rmse(f_log, tracts),
+          notes = "___")
+
+model_log
+
+# squared term
+
+f_squared <- y ~ pctbelpovE + pct60ttE + pct_rentersE + I(indego_per_sqmi^2) + dist_septa_mi + dist_school_mi
+
+model_log <- model_log %>%
+  add_row(model = "m6", added = "squared indego_per_sqmi",
+          cv_rmse = cv_rmse(f_squared, tracts),
+          notes = "___")
+
+model_log
+
+```
+
+```{r}
+# categorical
+
+tracts <- tracts %>%
+  mutate(
+    bikes = case_when(
+      n_indego < 1 ~ "No Indego stations",
+      n_indego >= 1 ~ "Has Indego stations",
+    ),
+    bikes = factor(bikes, levels = c("No Indego stations", "Has Indego stations"))
+  )
+
+f_cat <- y ~ pctbelpovE + pct60ttE + pct_rentersE + dist_septa_mi + dist_school_mi + bikes
+
+model_log <- model_log %>%
+  add_row(model = "m7", added = "added bikes cat var",
+          cv_rmse = cv_rmse(f_cat, tracts),
+          notes = "___")
+
+model_log
+```
+
+```{r}
+m_cat <- lm(f_cat, data=tracts)
+summary(m_cat)
+```
+
+In the categorical variable summary, the reference level was `bikesNo Indego Station`, which is absorbed into the intercept. Holding everything else constant, tracts with Indego bike stations have an outcome about 3.7 units higher than tracts without them (the reference group).
+
+Out of all three kinds of transformations, the $\text{log}$ transformation helped the most, even though the squared term was not far behind. The categorical variable hurt the model, which could be due to it simplifying the `indego_per_sqmi` variable.
+
+## Part 6: Your final model
+
+```{r}
+#| label: final
+f_final <- y ~ pctbelpovE + pct60ttE + pct_rentersE + log(dist_septa_mi) + dist_school_mi + I(indego_per_sqmi^2)
+
+m_final <- lm(f_final, data = tracts)
+summary(m_final)
+
+model_log <- model_log %>%
+  add_row(model = "final", added = "log and squared term transformaion",
+          cv_rmse = cv_rmse(f_final, tracts),
+          notes = "___")
+
+model_log
+```
+
+### Where is the final model wrong?
+
+```{r}
+#| label: resid-map-2
+tracts <- tracts %>% mutate(resid_final = residuals(m_final))
+
+fm <- ggplot(tracts) +
+  geom_sf(aes(fill = resid_final), color = NA) +
+  scale_fill_gradient2(low = "#2166ac", mid = "grey95", high = "#b2182b", midpoint = 0) +
+  labs(title = "Final model: where it's wrong",
+       subtitle = "Red = actual higher than predicted",
+       fill = "Residual") + theme_void(base_family='jakarta')
+
+bm + fm
+```
+
+The final model tended to underpredict less than the baseline model, but clusters tended to stay in the same areas (northeast and northwest corners, North Philly and Center City).
+
+### Are the biggest misses in the least reliable tracts?
+
+```{r}
+#| label: fog
+ggplot(tracts, aes(x = y_cv, y = abs(resid_final))) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(se = FALSE, color='tomato1') +
+  labs(x = "CV of your outcome estimate (%)", y = "Size of the miss") 
+```
+
+------------------------------------------------------------------------
+
+## Part 7: Reflection
+
+One featured that lowered $\text{RMSE}$ the most was adding the `dist_septa_mi` predictor, bringing it down by almost an entire percentage point. Adding the `bikes` categorical variable made the $\text{RMSE}$ slightly worse, which could be due to it oversimplifying the original `n_indego` variable.
+
+To interpret a coefficient, `pct_rentersE` features a $\hat{\beta}$ value of 0.4229. Holding the other predictors constant, each 1-percentage-point increase in a tract’s share of renter-occupied households is associated with a 0.42-percentage-point increase in the share of households with no vehicle. For a tract with typical values on the other predictors, the model predicts that moving from, 30% to 60% renters, for example, raises the predicted no-vehicle rate by about 12.7 percentage points $(0.423 × 30)$, so renter share alone shifts the model’s fitted value $\hat{y}$ substantially.
+
+Looking at my residual map, I'm interested in how median household income could impact the model, rather than just percent below poverty (due to Chestnut Hill having a large cluster of underpredicted residuals, even after including transit accessibility in the model). I would likely get this data from the ACS.
+
+Since the smooth line stays mostly flat, most of the error likely comes from the model rather than noise from original estimates. There doesn't seem to be a substantial relationship between CV of census tracts and the residuals.
